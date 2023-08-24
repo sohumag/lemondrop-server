@@ -1,0 +1,1330 @@
+[
+	{
+		"id": "3da2cc1a7386f81a7b633d7be9e2424a",
+		"sport_key": "baseball_mlb",
+		"sport_title": "MLB",
+		"commence_time": "2023-08-23T16:35:00Z",
+		"home_team": "Pittsburgh Pirates",
+		"away_team": "St. Louis Cardinals",
+		"bookmakers": [
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:17:15Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:17:15Z",
+						"outcomes": [
+							{
+								"name": "Pittsburgh Pirates",
+								"price": 650
+							},
+							{
+								"name": "St. Louis Cardinals",
+								"price": -1300
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "barstool",
+				"title": "Barstool Sportsbook",
+				"last_update": "2023-08-23T17:18:50Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:50Z",
+						"outcomes": [
+							{
+								"name": "Pittsburgh Pirates",
+								"price": 800
+							},
+							{
+								"name": "St. Louis Cardinals",
+								"price": -1400
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "fanduel",
+				"title": "FanDuel",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Pittsburgh Pirates",
+								"price": 780
+							},
+							{
+								"name": "St. Louis Cardinals",
+								"price": -1450
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Pittsburgh Pirates",
+								"price": 700
+							},
+							{
+								"name": "St. Louis Cardinals",
+								"price": -1400
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:27Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:27Z",
+						"outcomes": [
+							{
+								"name": "Pittsburgh Pirates",
+								"price": 800
+							},
+							{
+								"name": "St. Louis Cardinals",
+								"price": -1667
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "d84eb88ac8c485ad8adacbaba25c9e92",
+		"sport_key": "soccer_germany_liga3",
+		"sport_title": "3. Liga - Germany",
+		"commence_time": "2023-08-23T17:00:20Z",
+		"home_team": "SC Freiburg II",
+		"away_team": "SpVgg Unterhaching",
+		"bookmakers": [
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "SC Freiburg II",
+								"price": 170
+							},
+							{
+								"name": "SpVgg Unterhaching",
+								"price": 176
+							},
+							{
+								"name": "Draw",
+								"price": 190
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "SC Freiburg II",
+								"price": 148
+							},
+							{
+								"name": "SpVgg Unterhaching",
+								"price": 175
+							},
+							{
+								"name": "Draw",
+								"price": 215
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "9388ee338a0522989cac59c21bd501af",
+		"sport_key": "soccer_germany_liga3",
+		"sport_title": "3. Liga - Germany",
+		"commence_time": "2023-08-23T17:00:39Z",
+		"home_team": "FC Viktoria Köln 1904",
+		"away_team": "Rot-Weiss Essen",
+		"bookmakers": [
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "FC Viktoria Köln 1904",
+								"price": 120
+							},
+							{
+								"name": "Rot-Weiss Essen",
+								"price": 215
+							},
+							{
+								"name": "Draw",
+								"price": 230
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "FC Viktoria Köln 1904",
+								"price": 120
+							},
+							{
+								"name": "Rot-Weiss Essen",
+								"price": 205
+							},
+							{
+								"name": "Draw",
+								"price": 215
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "53ef33eeb72a4e49ee82b980c8f04694",
+		"sport_key": "soccer_germany_liga3",
+		"sport_title": "3. Liga - Germany",
+		"commence_time": "2023-08-23T17:00:47Z",
+		"home_team": "Jahn Regensburg",
+		"away_team": "Borussia Dortmund II",
+		"bookmakers": [
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "Borussia Dortmund II",
+								"price": 210
+							},
+							{
+								"name": "Jahn Regensburg",
+								"price": 126
+							},
+							{
+								"name": "Draw",
+								"price": 225
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "Borussia Dortmund II",
+								"price": 205
+							},
+							{
+								"name": "Jahn Regensburg",
+								"price": 128
+							},
+							{
+								"name": "Draw",
+								"price": 210
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "b9d8a18ce7ec8f5af9717e7db5fece5b",
+		"sport_key": "soccer_germany_liga3",
+		"sport_title": "3. Liga - Germany",
+		"commence_time": "2023-08-23T17:01:53Z",
+		"home_team": "1. FC Saarbrücken",
+		"away_team": "SC Verl",
+		"bookmakers": [
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "1. FC Saarbrücken",
+								"price": -305
+							},
+							{
+								"name": "SC Verl",
+								"price": 675
+							},
+							{
+								"name": "Draw",
+								"price": 410
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "1. FC Saarbrücken",
+								"price": -333
+							},
+							{
+								"name": "SC Verl",
+								"price": 700
+							},
+							{
+								"name": "Draw",
+								"price": 380
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "c5bf3dc6a17fc0b2fa5ec32fd6ba8385",
+		"sport_key": "soccer_germany_liga3",
+		"sport_title": "3. Liga - Germany",
+		"commence_time": "2023-08-23T17:02:18Z",
+		"home_team": "Erzgebirge Aue",
+		"away_team": "SV Sandhausen",
+		"bookmakers": [
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "Erzgebirge Aue",
+								"price": 230
+							},
+							{
+								"name": "SV Sandhausen",
+								"price": 112
+							},
+							{
+								"name": "Draw",
+								"price": 220
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:08Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:08Z",
+						"outcomes": [
+							{
+								"name": "Erzgebirge Aue",
+								"price": 240
+							},
+							{
+								"name": "SV Sandhausen",
+								"price": 110
+							},
+							{
+								"name": "Draw",
+								"price": 215
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "c8c038b8623afedbf76c97b9af8eea7a",
+		"sport_key": "cricket_the_hundred",
+		"sport_title": "The Hundred",
+		"commence_time": "2023-08-23T17:30:00Z",
+		"home_team": "Manchester Originals",
+		"away_team": "Southern Brave",
+		"bookmakers": [
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:19:34Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:34Z",
+						"outcomes": [
+							{
+								"name": "Manchester Originals",
+								"price": -115
+							},
+							{
+								"name": "Southern Brave",
+								"price": -105
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:34Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:34Z",
+						"outcomes": [
+							{
+								"name": "Manchester Originals",
+								"price": -111
+							},
+							{
+								"name": "Southern Brave",
+								"price": -111
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "ec0ccddbec5830dda2ace47570b53bc9",
+		"sport_key": "baseball_mlb",
+		"sport_title": "MLB",
+		"commence_time": "2023-08-23T17:45:00Z",
+		"home_team": "Detroit Tigers",
+		"away_team": "Chicago Cubs",
+		"bookmakers": [
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:17:15Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:17:15Z",
+						"outcomes": [
+							{
+								"name": "Chicago Cubs",
+								"price": 102
+							},
+							{
+								"name": "Detroit Tigers",
+								"price": -122
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "barstool",
+				"title": "Barstool Sportsbook",
+				"last_update": "2023-08-23T17:18:50Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:50Z",
+						"outcomes": [
+							{
+								"name": "Chicago Cubs",
+								"price": 105
+							},
+							{
+								"name": "Detroit Tigers",
+								"price": -125
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "fanduel",
+				"title": "FanDuel",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Chicago Cubs",
+								"price": 106
+							},
+							{
+								"name": "Detroit Tigers",
+								"price": -124
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Chicago Cubs",
+								"price": 104
+							},
+							{
+								"name": "Detroit Tigers",
+								"price": -124
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:09:42Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:09:42Z",
+						"outcomes": [
+							{
+								"name": "Chicago Cubs",
+								"price": 105
+							},
+							{
+								"name": "Detroit Tigers",
+								"price": -125
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "35280fe007325f02847ae6602644a5ff",
+		"sport_key": "baseball_mlb",
+		"sport_title": "MLB",
+		"commence_time": "2023-08-23T18:10:00Z",
+		"home_team": "Chicago White Sox",
+		"away_team": "Seattle Mariners",
+		"bookmakers": [
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:17:15Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:17:15Z",
+						"outcomes": [
+							{
+								"name": "Chicago White Sox",
+								"price": 185
+							},
+							{
+								"name": "Seattle Mariners",
+								"price": -225
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "barstool",
+				"title": "Barstool Sportsbook",
+				"last_update": "2023-08-23T17:18:50Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:50Z",
+						"outcomes": [
+							{
+								"name": "Chicago White Sox",
+								"price": 190
+							},
+							{
+								"name": "Seattle Mariners",
+								"price": -220
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "fanduel",
+				"title": "FanDuel",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Chicago White Sox",
+								"price": 190
+							},
+							{
+								"name": "Seattle Mariners",
+								"price": -230
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Chicago White Sox",
+								"price": 190
+							},
+							{
+								"name": "Seattle Mariners",
+								"price": -230
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:27Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:27Z",
+						"outcomes": [
+							{
+								"name": "Chicago White Sox",
+								"price": 195
+							},
+							{
+								"name": "Seattle Mariners",
+								"price": -238
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "3f6e7ce034af9ea1b32b22296f63d76c",
+		"sport_key": "baseball_mlb",
+		"sport_title": "MLB",
+		"commence_time": "2023-08-23T18:10:00Z",
+		"home_team": "Milwaukee Brewers",
+		"away_team": "Minnesota Twins",
+		"bookmakers": [
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:17:15Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:17:15Z",
+						"outcomes": [
+							{
+								"name": "Milwaukee Brewers",
+								"price": -142
+							},
+							{
+								"name": "Minnesota Twins",
+								"price": 120
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "barstool",
+				"title": "Barstool Sportsbook",
+				"last_update": "2023-08-23T17:18:50Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:50Z",
+						"outcomes": [
+							{
+								"name": "Milwaukee Brewers",
+								"price": -140
+							},
+							{
+								"name": "Minnesota Twins",
+								"price": 120
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "fanduel",
+				"title": "FanDuel",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Milwaukee Brewers",
+								"price": -144
+							},
+							{
+								"name": "Minnesota Twins",
+								"price": 122
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Milwaukee Brewers",
+								"price": -144
+							},
+							{
+								"name": "Minnesota Twins",
+								"price": 121
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:27Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:27Z",
+						"outcomes": [
+							{
+								"name": "Milwaukee Brewers",
+								"price": -147
+							},
+							{
+								"name": "Minnesota Twins",
+								"price": 125
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "847e44284a92da9263e8b81458db6ece",
+		"sport_key": "soccer_uefa_champs_league_qualification",
+		"sport_title": "UEFA Champions League Qualification",
+		"commence_time": "2023-08-23T19:00:00Z",
+		"home_team": "Molde FK",
+		"away_team": "Galatasaray",
+		"bookmakers": [
+			{
+				"key": "fanduel",
+				"title": "FanDuel",
+				"last_update": "2023-08-23T17:18:48Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:48Z",
+						"outcomes": [
+							{
+								"name": "Galatasaray",
+								"price": 150
+							},
+							{
+								"name": "Molde FK",
+								"price": 170
+							},
+							{
+								"name": "Draw",
+								"price": 210
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Galatasaray",
+								"price": 150
+							},
+							{
+								"name": "Molde FK",
+								"price": 175
+							},
+							{
+								"name": "Draw",
+								"price": 245
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:18:50Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:50Z",
+						"outcomes": [
+							{
+								"name": "Galatasaray",
+								"price": 155
+							},
+							{
+								"name": "Molde FK",
+								"price": 175
+							},
+							{
+								"name": "Draw",
+								"price": 230
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Galatasaray",
+								"price": 155
+							},
+							{
+								"name": "Molde FK",
+								"price": 175
+							},
+							{
+								"name": "Draw",
+								"price": 240
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "barstool",
+				"title": "Barstool Sportsbook",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Galatasaray",
+								"price": 150
+							},
+							{
+								"name": "Molde FK",
+								"price": 175
+							},
+							{
+								"name": "Draw",
+								"price": 235
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "4c24b9a9f0dba18b64c3e707877d095f",
+		"sport_key": "soccer_uefa_champs_league_qualification",
+		"sport_title": "UEFA Champions League Qualification",
+		"commence_time": "2023-08-23T19:00:00Z",
+		"home_team": "Maccabi Haifa",
+		"away_team": "Young Boys",
+		"bookmakers": [
+			{
+				"key": "fanduel",
+				"title": "FanDuel",
+				"last_update": "2023-08-23T17:18:48Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:48Z",
+						"outcomes": [
+							{
+								"name": "Maccabi Haifa",
+								"price": 118
+							},
+							{
+								"name": "Young Boys",
+								"price": -144
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Maccabi Haifa",
+								"price": 125
+							},
+							{
+								"name": "Young Boys",
+								"price": 200
+							},
+							{
+								"name": "Draw",
+								"price": 255
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:18:50Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:50Z",
+						"outcomes": [
+							{
+								"name": "Maccabi Haifa",
+								"price": 128
+							},
+							{
+								"name": "Young Boys",
+								"price": 200
+							},
+							{
+								"name": "Draw",
+								"price": 245
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Maccabi Haifa",
+								"price": 125
+							},
+							{
+								"name": "Young Boys",
+								"price": 200
+							},
+							{
+								"name": "Draw",
+								"price": 265
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "barstool",
+				"title": "Barstool Sportsbook",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Maccabi Haifa",
+								"price": 125
+							},
+							{
+								"name": "Young Boys",
+								"price": 195
+							},
+							{
+								"name": "Draw",
+								"price": 260
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "72b754d297efb25fbd4113b4ecc6ea20",
+		"sport_key": "soccer_uefa_champs_league_qualification",
+		"sport_title": "UEFA Champions League Qualification",
+		"commence_time": "2023-08-23T19:00:00Z",
+		"home_team": "SC Braga",
+		"away_team": "Panathinaikos FC",
+		"bookmakers": [
+			{
+				"key": "fanduel",
+				"title": "FanDuel",
+				"last_update": "2023-08-23T17:18:48Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:48Z",
+						"outcomes": [
+							{
+								"name": "Panathinaikos FC",
+								"price": 500
+							},
+							{
+								"name": "SC Braga",
+								"price": -175
+							},
+							{
+								"name": "Draw",
+								"price": 250
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Panathinaikos FC",
+								"price": 500
+							},
+							{
+								"name": "SC Braga",
+								"price": -165
+							},
+							{
+								"name": "Draw",
+								"price": 265
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:18:50Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:50Z",
+						"outcomes": [
+							{
+								"name": "Panathinaikos FC",
+								"price": 480
+							},
+							{
+								"name": "SC Braga",
+								"price": -154
+							},
+							{
+								"name": "Draw",
+								"price": 255
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Panathinaikos FC",
+								"price": 500
+							},
+							{
+								"name": "SC Braga",
+								"price": -160
+							},
+							{
+								"name": "Draw",
+								"price": 265
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "barstool",
+				"title": "Barstool Sportsbook",
+				"last_update": "2023-08-23T17:19:13Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:13Z",
+						"outcomes": [
+							{
+								"name": "Panathinaikos FC",
+								"price": 475
+							},
+							{
+								"name": "SC Braga",
+								"price": -160
+							},
+							{
+								"name": "Draw",
+								"price": 260
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"id": "a299d523f82205b8703a3f4596d03ab4",
+		"sport_key": "baseball_mlb",
+		"sport_title": "MLB",
+		"commence_time": "2023-08-23T19:37:00Z",
+		"home_team": "Oakland Athletics",
+		"away_team": "Kansas City Royals",
+		"bookmakers": [
+			{
+				"key": "draftkings",
+				"title": "DraftKings",
+				"last_update": "2023-08-23T17:17:15Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:17:15Z",
+						"outcomes": [
+							{
+								"name": "Kansas City Royals",
+								"price": -148
+							},
+							{
+								"name": "Oakland Athletics",
+								"price": 124
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "barstool",
+				"title": "Barstool Sportsbook",
+				"last_update": "2023-08-23T17:18:50Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:18:50Z",
+						"outcomes": [
+							{
+								"name": "Kansas City Royals",
+								"price": -145
+							},
+							{
+								"name": "Oakland Athletics",
+								"price": 125
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "fanduel",
+				"title": "FanDuel",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Kansas City Royals",
+								"price": -146
+							},
+							{
+								"name": "Oakland Athletics",
+								"price": 124
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "unibet",
+				"title": "Unibet",
+				"last_update": "2023-08-23T17:19:27Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:27Z",
+						"outcomes": [
+							{
+								"name": "Kansas City Royals",
+								"price": -141
+							},
+							{
+								"name": "Oakland Athletics",
+								"price": 120
+							}
+						]
+					}
+				]
+			},
+			{
+				"key": "bovada",
+				"title": "Bovada",
+				"last_update": "2023-08-23T17:19:05Z",
+				"markets": [
+					{
+						"key": "h2h",
+						"last_update": "2023-08-23T17:19:05Z",
+						"outcomes": [
+							{
+								"name": "Kansas City Royals",
+								"price": -147
+							},
+							{
+								"name": "Oakland Athletics",
+								"price": 123
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+]
