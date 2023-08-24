@@ -27,7 +27,6 @@ func (g *GameServer) MigrateSports() error {
 }
 
 func (g *GameServer) MigrateAllGames() error {
-	return nil // protection against expensive API call
 
 	sports := []string{
 		"americanfootball_ncaaf",

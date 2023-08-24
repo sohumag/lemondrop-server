@@ -3,6 +3,7 @@ package games
 import (
 	"context"
 	"os"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,6 +35,18 @@ func ConnectDB() *mongo.Client {
 }
 
 func (g *GameServer) Start() error {
-	g.StartAPI()
-	return nil
+	go g.StartAPI()
+
+	// auto update all new games and scores for games
+	for {
+		for i := 0; i < 4; i++ {
+			time.Sleep(time.Hour * 6)
+			g.UpdateGameScores()
+
+		}
+
+		g.MigrateAllGames()
+
+	}
+
 }
