@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// * GET ALL CATEGORIES
+// * GET ALL CURRENT CATEGORIES
 func (g *GameServer) SendAllSportsCategories(c *fiber.Ctx) error {
 
 	categoryStrs := []string{

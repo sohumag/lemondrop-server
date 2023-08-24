@@ -4,28 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-func ConnectDB() *mongo.Client {
-	uri := os.Getenv("MONGO_URI")
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	if err != nil {
-		panic(err)
-	}
-
-	// defer func() {
-	// 	if err := client.Disconnect(context.TODO()); err != nil {
-	// 		panic(err)
-	// 	}
-	// }()
-
-	return client
-}
 
 func (g *GameServer) GetAllCategories() ([]Category, error) {
 	allSports, err := g.GetAllSportsFromDB()
@@ -46,7 +27,6 @@ func (g *GameServer) GetAllCategories() ([]Category, error) {
 	}
 
 	return categoriesArr, nil
-
 }
 
 func (g *GameServer) GetAllSportsInCategory(category string) ([]Sport, error) {
@@ -85,44 +65,14 @@ func (g *GameServer) GetAllSportsFromDB() ([]Sport, error) {
 	return sports, nil
 }
 
-func (g *GameServer) GetUpcomingGamesBySport(sport string) ([]Game, error) {
-	coll := g.client.Database("games-db").Collection("games")
-	cursor, err := coll.Find(context.TODO(), bson.D{{"sporttitle", sport}})
+func (g *GameServer) AddSportToDB(sport *Sport) error {
+	coll := g.client.Database("games-db").Collection("sports")
+	result, err := coll.InsertOne(context.TODO(), *sport)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	games := []Game{}
-	if err = cursor.All(context.TODO(), &games); err != nil {
-		return nil, err
-	}
+	fmt.Printf("Added sport with id: %v\n", result.InsertedID)
 
-	if len(games) == 0 {
-		return nil, fmt.Errorf("invalid sport")
-	}
-
-	return games, nil
-}
-
-func (g *GameServer) GetAllUpcomingGames(max int) ([]Game, error) {
-	internalMaxNum := 25
-	coll := g.client.Database("games-db").Collection("games")
-
-	if max > internalMaxNum {
-		max = internalMaxNum
-	}
-
-	opts := options.Find().SetLimit(int64(max))
-	cursor, err := coll.Find(context.TODO(), bson.D{{}}, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	games := []Game{}
-	if err = cursor.All(context.TODO(), &games); err != nil {
-		return nil, err
-	}
-
-	return games, nil
-
+	return nil
 }

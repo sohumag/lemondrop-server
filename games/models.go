@@ -11,20 +11,6 @@ type GameServer struct {
 	client *mongo.Client
 }
 
-func NewGameServer(listenAddr string) *GameServer {
-	// g := &GameServer{port: listenAddr}
-
-	return &GameServer{
-		port:   listenAddr,
-		client: ConnectDB(),
-	}
-}
-
-func (g *GameServer) Start() error {
-	g.StartAPI()
-	return nil
-}
-
 type Category struct {
 	Name string `json:"name"`
 }
