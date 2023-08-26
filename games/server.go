@@ -35,9 +35,11 @@ func ConnectDB() *mongo.Client {
 }
 
 func (g *GameServer) Start() error {
-	go g.StartAPI()
+	g.StartAPI()
 
 	// auto update all new games and scores for games
+	// go g.StartAPI()
+
 	for {
 		for i := 0; i < 4; i++ {
 			time.Sleep(time.Hour * 6)
@@ -49,4 +51,5 @@ func (g *GameServer) Start() error {
 
 	}
 
+	return nil
 }

@@ -81,6 +81,7 @@ func (g *GameServer) MigrateGamesBySport(sport string) error {
 	}
 
 	for _, game := range games {
+
 		err := g.AddGameToDB(&game)
 		if err != nil {
 			return err
@@ -107,8 +108,7 @@ func (g *GameServer) GetGamesBySport(sportKey string) ([]Game, error) {
 	return games, nil
 }
 
-//# HISTORIC NOT USED
-
+// # HISTORIC NOT USED
 func (g *GameServer) AddAllSportsEndpointsToFile() error {
 	reqUrl := "https://api.the-odds-api.com/v4/sports?apiKey=e0ae2e9cd2c145da9659ce53ddbc4442"
 

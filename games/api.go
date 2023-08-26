@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 /*
@@ -19,6 +20,14 @@ func (g *GameServer) StartAPI() error {
 	log.Println("Starting API on port", g.port)
 
 	app := fiber.New()
+
+	// app.Use(cors.New(cors.Config{
+	// 	AllowOrigins: "https://gofiber.io, https://gofiber.net",
+	// 	AllowHeaders: "Origin, Content-Type, Accept",
+	// }))
+
+	app.Use(cors.New())
+
 	app.Get("/api", func(c *fiber.Ctx) error {
 		return c.SendString("API is running")
 	})
