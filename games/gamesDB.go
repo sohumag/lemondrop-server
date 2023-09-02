@@ -3,6 +3,7 @@ package games
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -27,16 +28,20 @@ func (g *GameServer) GetUpcomingGamesBySport(sport string) ([]Game, error) {
 	return games, nil
 }
 
-func (g *GameServer) GetAllUpcomingGames(max int) ([]Game, error) {
-	internalMaxNum := 25
+func (g *GameServer) GetAllUpcomingGames(maxNum int) ([]Game, error) {
+	internalMaxNum := 60
 	coll := g.client.Database("games-db").Collection("games")
 
-	if max > internalMaxNum {
-		max = internalMaxNum
+	if maxNum > internalMaxNum {
+		maxNum = internalMaxNum
 	}
 
-	opts := options.Find().SetLimit(int64(max))
-	cursor, err := coll.Find(context.TODO(), bson.D{{}}, opts)
+	filter := bson.M{
+		"commencetime": bson.M{"$gt": time.Now()},
+	}
+
+	opts := options.Find().SetLimit(int64(maxNum))
+	cursor, err := coll.Find(context.TODO(), filter, opts)
 	if err != nil {
 		return nil, err
 	}

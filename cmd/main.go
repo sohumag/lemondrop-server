@@ -9,8 +9,8 @@ func main() {
 	godotenv.Load("./.env")
 
 	gs := games.NewGameServer(":8080")
-	gs.MigrateAllGames()
-	// gs.Start()
+	// gs.MigrateAllGames()
+	gs.Start()
 
 	// gs.RunGameScoreUpdates()
 	// err := gs.GetScoresForGames()

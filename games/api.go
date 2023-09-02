@@ -50,6 +50,10 @@ func (g *GameServer) StartAPI() error {
 		return g.SendGamesUpcoming(c)
 	})
 
+	app.Get("/api/games/All", func(c *fiber.Ctx) error {
+		return g.SendGamesUpcoming(c)
+	})
+
 	app.Get("/api/games/:sport", func(c *fiber.Ctx) error {
 		return g.SendGamesBySport(c, c.Params("sport"))
 	})

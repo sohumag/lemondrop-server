@@ -42,25 +42,25 @@ func (g *GameServer) MigrateAllGames() error {
 		"basketball_nba_championship_winner",
 		"basketball_wnba",
 
-		"boxing_boxing",
+		// "boxing_boxing",
 
-		"cricket_asia_cup",
-		"cricket_caribbean_premier_league",
-		"cricket_international_t20",
-		"cricket_odi",
-		"cricket_the_hundred",
+		// "cricket_asia_cup",
+		// "cricket_caribbean_premier_league",
+		// "cricket_international_t20",
+		// "cricket_odi",
+		// "cricket_the_hundred",
 
-		"golf_masters_tournament_winner",
-		"golf_pga_championship_winner",
-		"golf_us_open_winnner",
+		// "golf_masters_tournament_winner",
+		// "golf_pga_championship_winner",
+		// "golf_us_open_winnner",
 
-		"icehockey_nhl_championship_winner",
-		"icehockey_sweden_allsvenskan",
-		"icehockey_sweden_hockey_league",
+		// "icehockey_nhl_championship_winner",
+		// "icehockey_sweden_allsvenskan",
+		// "icehockey_sweden_hockey_league",
 
-		"mma_mixed_martial_arts",
+		// "mma_mixed_martial_arts",
 
-		"rugbyleague_nrl",
+		// "rugbyleague_nrl",
 	}
 
 	for _, sport := range sports {

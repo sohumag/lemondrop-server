@@ -10,15 +10,16 @@ import (
 func (g *GameServer) SendAllSportsCategories(c *fiber.Ctx) error {
 
 	categoryStrs := []string{
+		"All",
 		"American Football",
 		"Baseball",
 		"Basketball",
-		"Boxing",
-		"Cricket",
-		"Golf",
-		"Ice Hockey",
-		"Mixed Martial Arts",
-		"Rubgy League",
+		// "Boxing",
+		// "Cricket",
+		// "Golf",
+		// "Ice Hockey",
+		// "Mixed Martial Arts",
+		// "Rubgy League",
 	}
 
 	categories := []Category{}
