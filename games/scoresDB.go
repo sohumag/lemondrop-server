@@ -16,6 +16,7 @@ func (g *GameServer) UpdateGameScores() error {
 	coll := g.client.Database("games-db").Collection("games")
 	cursor, err := coll.Find(context.TODO(), bson.M{
 		"commencetime": bson.M{"$lt": time.Now(), "$gt": time.Now().AddDate(0, 0, -3)},
+		"completed":    false,
 	})
 	if err != nil {
 		return err

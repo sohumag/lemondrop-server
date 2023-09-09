@@ -38,6 +38,10 @@ func (g *GameServer) StartAPI() error {
 		return g.SendAllSportsCategories(c)
 	})
 
+	app.Get("/api/sports/all", func(c *fiber.Ctx) error {
+		return g.SendAllSports(c)
+	})
+
 	app.Get("/api/sports/:category", func(c *fiber.Ctx) error {
 		return g.SendSportsFromCategories(c, c.Params("category"))
 	})
@@ -56,6 +60,10 @@ func (g *GameServer) StartAPI() error {
 
 	app.Get("/api/games/:sport", func(c *fiber.Ctx) error {
 		return g.SendGamesBySport(c, c.Params("sport"))
+	})
+
+	app.Get("/api/games/game/:id", func(c *fiber.Ctx) error {
+		return g.SendGameById(c, c.Params("id"))
 	})
 
 	app.Listen(g.port)

@@ -1,10 +1,26 @@
 package games
 
 import (
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson"
 )
+
+func (g *GameServer) SendGameById(c *fiber.Ctx, id string) error {
+	coll := g.client.Database("games-db").Collection("games")
+	var game Game
+	if err := coll.FindOne(context.TODO(), bson.D{{Key: "gameid", Value: id}}).Decode(&game); err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+
+	c.JSON(ParseGames([]Game{game})[0])
+
+	return nil
+}
 
 func (g *GameServer) SendGamesBySport(c *fiber.Ctx, sport string) error {
 	games, err := g.GetUpcomingGamesBySport(sport)
@@ -12,7 +28,7 @@ func (g *GameServer) SendGamesBySport(c *fiber.Ctx, sport string) error {
 		return err
 	}
 
-	c.JSON(games)
+	c.JSON(ParseGames(games))
 	return nil
 }
 

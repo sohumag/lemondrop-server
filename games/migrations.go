@@ -30,17 +30,17 @@ func (g *GameServer) MigrateAllGames() error {
 
 	sports := []string{
 		"americanfootball_ncaaf",
-		"americanfootball_cfl",
+		// "americanfootball_cfl",
 		"americanfootball_nfl",
 		"americanfootball_nfl_preseason",
-		"americanfootball_nfl_super_bowl_winner",
+		// "americanfootball_nfl_super_bowl_winner",
 
 		"baseball_mlb",
-		"baseball_mlb_world_series_winner",
+		// "baseball_mlb_world_series_winner",
 
 		"basketball_nba",
-		"basketball_nba_championship_winner",
-		"basketball_wnba",
+		// "basketball_nba_championship_winner",
+		// "basketball_wnba",
 
 		// "boxing_boxing",
 
@@ -73,7 +73,7 @@ func (g *GameServer) MigrateAllGames() error {
 }
 
 func (g *GameServer) MigrateGamesBySport(sport string) error {
-
+	fmt.Printf("migrating games for sport: %s\n", sport)
 	games, err := g.GetGamesBySport(sport)
 	if err != nil {
 		return err
@@ -81,7 +81,6 @@ func (g *GameServer) MigrateGamesBySport(sport string) error {
 	}
 
 	for _, game := range games {
-
 		err := g.AddGameToDB(&game)
 		if err != nil {
 			return err

@@ -6,6 +6,47 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func (g *GameServer) SendAllSports(c *fiber.Ctx) error {
+
+	type SportSend struct {
+		Group string `json:"group"`
+		Title string `json:"title"`
+		Id    string `json:"id"`
+	}
+
+	games := []SportSend{
+		{
+			Group: "Football",
+			Title: "NCAAF",
+			Id:    "americanfootball_ncaaf",
+		},
+		{
+			Group: "Football",
+			Title: "NFL",
+			Id:    "americanfootball_nfl",
+		},
+		{
+			Group: "Football",
+			Title: "NFL Preseason",
+			Id:    "americanfootball_nfl_preseason",
+		},
+		{
+			Group: "Baseball",
+			Title: "MLB",
+			Id:    "baseball_mlb",
+		},
+		{
+			Group: "Basketball",
+			Title: "NBA",
+			Id:    "basketball_nba",
+		},
+	}
+
+	c.JSON(games)
+
+	return nil
+}
+
 // * GET ALL CURRENT CATEGORIES
 func (g *GameServer) SendAllSportsCategories(c *fiber.Ctx) error {
 
@@ -40,6 +81,7 @@ func (g *GameServer) SendSportsFromCategories(c *fiber.Ctx, category string) err
 	if err != nil {
 		return err
 	}
+
 	sportsInCategory := []Sport{}
 	for _, sport := range allSports {
 		if sport.Group == category {

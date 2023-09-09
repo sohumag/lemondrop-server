@@ -11,7 +11,8 @@ import (
 
 func (g *GameServer) GetUpcomingGamesBySport(sport string) ([]Game, error) {
 	coll := g.client.Database("games-db").Collection("games")
-	cursor, err := coll.Find(context.TODO(), bson.D{{Key: "sporttitle", Value: sport}})
+	filter := bson.M{"commencetime": bson.M{"$gt": time.Now(), "$lt": time.Now().Add(time.Hour * 36)}, "sportkey": sport}
+	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +23,7 @@ func (g *GameServer) GetUpcomingGamesBySport(sport string) ([]Game, error) {
 	}
 
 	if len(games) == 0 {
-		return nil, fmt.Errorf("invalid sport")
+		return []Game{}, nil
 	}
 
 	return games, nil
@@ -37,7 +38,7 @@ func (g *GameServer) GetAllUpcomingGames(maxNum int) ([]Game, error) {
 	}
 
 	filter := bson.M{
-		"commencetime": bson.M{"$gt": time.Now()},
+		"commencetime": bson.M{"$gt": time.Now(), "$lt": time.Now().Add(time.Hour * 36)},
 	}
 
 	opts := options.Find().SetLimit(int64(maxNum))
@@ -58,7 +59,6 @@ func (g *GameServer) AddGameToDB(game *Game) error {
 	coll := g.client.Database("games-db").Collection("games")
 
 	// find if game already exists, if does then update
-
 	var needsUpdateGame Game
 	err := coll.FindOne(context.TODO(), bson.D{{Key: "gameid", Value: game.GameId}}).Decode(&needsUpdateGame)
 
@@ -75,14 +75,14 @@ func (g *GameServer) AddGameToDB(game *Game) error {
 
 	// if game does exist, update
 	filter := bson.D{{Key: "gameid", Value: game.GameId}}
-	update := bson.M{"$set": bson.M{"bookmakers": needsUpdateGame.Bookmakers, "scores": needsUpdateGame.Scores, "completed": needsUpdateGame.Completed, "lastupdate": needsUpdateGame.LastUpdate}}
+	update := bson.M{"$set": bson.M{"bookmakers": game.Bookmakers, "scores": game.Scores, "completed": game.Completed, "lastupdate": game.LastUpdate}}
 
 	result, err := coll.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Modified %v documents\n", result.ModifiedCount)
+	fmt.Printf("Modified %v games\n", result.ModifiedCount)
 
 	return nil
 }
