@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 /*
@@ -16,57 +15,42 @@ import (
 * GET all games general
  */
 
-func (g *GameServer) StartAPI() error {
-	log.Println("Starting API on port", g.port)
+func (g *GameServer) StartGameServerAPI(api fiber.Router) error {
+	log.Println("Adding game server endpoints to API")
 
-	app := fiber.New()
-
-	// app.Use(cors.New(cors.Config{
-	// 	AllowOrigins: "https://gofiber.io, https://gofiber.net",
-	// 	AllowHeaders: "Origin, Content-Type, Accept",
-	// }))
-
-	app.Use(cors.New())
-
-	app.Get("/api", func(c *fiber.Ctx) error {
-		return c.SendString("API is running")
-	})
-
-	// SPORTS/CATEGORIES ---------------------
-
-	app.Get("/api/categories/all", func(c *fiber.Ctx) error {
+	// CATEGORIES ---------------------
+	categoriesApi := api.Group("/categories")
+	categoriesApi.Get("/api/categories/all", func(c *fiber.Ctx) error {
 		return g.SendAllSportsCategories(c)
 	})
 
-	app.Get("/api/sports/all", func(c *fiber.Ctx) error {
+	// SPORTS ----------------------------
+	sportsApi := api.Group("/sports")
+	sportsApi.Get("/api/sports/all", func(c *fiber.Ctx) error {
 		return g.SendAllSports(c)
 	})
 
-	app.Get("/api/sports/:category", func(c *fiber.Ctx) error {
+	sportsApi.Get("/api/sports/:category", func(c *fiber.Ctx) error {
 		return g.SendSportsFromCategories(c, c.Params("category"))
 	})
 
 	// GAMES --------------------------------
-
-	// app.Get("/api/games/")
-
-	app.Get("/api/games/all", func(c *fiber.Ctx) error {
+	gamesApi := api.Group("/games")
+	gamesApi.Get("/all", func(c *fiber.Ctx) error {
 		return g.SendGamesUpcoming(c)
 	})
 
-	app.Get("/api/games/All", func(c *fiber.Ctx) error {
+	gamesApi.Get("/All", func(c *fiber.Ctx) error {
 		return g.SendGamesUpcoming(c)
 	})
 
-	app.Get("/api/games/:sport", func(c *fiber.Ctx) error {
+	gamesApi.Get("/:sport", func(c *fiber.Ctx) error {
 		return g.SendGamesBySport(c, c.Params("sport"))
 	})
 
-	app.Get("/api/games/game/:id", func(c *fiber.Ctx) error {
+	gamesApi.Get("/game/:id", func(c *fiber.Ctx) error {
 		return g.SendGameById(c, c.Params("id"))
 	})
-
-	app.Listen(g.port)
 
 	return nil
 }

@@ -4,15 +4,13 @@ import (
 	"context"
 	"os"
 
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewGameServer(listenAddr string) *GameServer {
-	// g := &GameServer{port: listenAddr}
-
+func NewGameServer() *GameServer {
 	return &GameServer{
-		port:   listenAddr,
 		client: ConnectDB(),
 	}
 }
@@ -27,7 +25,7 @@ func ConnectDB() *mongo.Client {
 	return client
 }
 
-func (g *GameServer) Start() error {
+func (g *GameServer) Start(api fiber.Router) error {
 	// go func() {
 	// 	for {
 	// 		time.Sleep(time.Hour * 4)
@@ -37,6 +35,8 @@ func (g *GameServer) Start() error {
 	// }()
 
 	// go g.MigrateAllGames()
-	g.StartAPI()
+
+	g.StartGameServerAPI(api)
+
 	return nil
 }
