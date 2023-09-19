@@ -13,3 +13,7 @@ run_binary:
 docker:
 	docker build -t lemondrop .
 	docker run -p 8080:8080 -p 80:80 lemondrop
+
+run:
+	go build -o bin ./...
+	./bin/cmd

@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/rlvgl/bookie-server/games"
+	"github.com/rlvgl/bookie-server/news"
+	"github.com/rlvgl/bookie-server/users"
 )
 
 func StartAPI(port int) error {
@@ -15,7 +16,7 @@ func StartAPI(port int) error {
 
 	// API Group Router
 	api := app.Group("/api")
-	app.Get("/api", func(c *fiber.Ctx) error {
+	api.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("API is running")
 	})
 
@@ -23,7 +24,17 @@ func StartAPI(port int) error {
 	gs := games.NewGameServer()
 	gs.Start(api)
 
-	log.Printf("Starting API on port %d\n", port)
+	// gs.MigrateAllGames()
+
+	// NEWS SERVER ------------------------
+	ns := news.NewNewsServer()
+	ns.Start(api)
+
+	// USER SERVER ------------------------
+	us := users.NewUserServer()
+	us.Start(api)
+
+	// log.Printf("Starting API on port %d\n", port)
 	app.Listen(fmt.Sprintf(":%d", port))
 
 	return nil

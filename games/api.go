@@ -20,17 +20,17 @@ func (g *GameServer) StartGameServerAPI(api fiber.Router) error {
 
 	// CATEGORIES ---------------------
 	categoriesApi := api.Group("/categories")
-	categoriesApi.Get("/api/categories/all", func(c *fiber.Ctx) error {
+	categoriesApi.Get("/all", func(c *fiber.Ctx) error {
 		return g.SendAllSportsCategories(c)
 	})
 
 	// SPORTS ----------------------------
 	sportsApi := api.Group("/sports")
-	sportsApi.Get("/api/sports/all", func(c *fiber.Ctx) error {
+	sportsApi.Get("/all", func(c *fiber.Ctx) error {
 		return g.SendAllSports(c)
 	})
 
-	sportsApi.Get("/api/sports/:category", func(c *fiber.Ctx) error {
+	sportsApi.Get("/:category", func(c *fiber.Ctx) error {
 		return g.SendSportsFromCategories(c, c.Params("category"))
 	})
 

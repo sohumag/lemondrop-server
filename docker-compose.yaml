@@ -1,0 +1,17 @@
+version: '3'
+services:
+  web:
+    container_name: api
+    build: .
+    ports:
+      - 8080:8080
+      - 80:80
+      - 8081:8081
+    restarts: on-failure
+
+  postgres:
+
+
+volumes:
+  web:
+  postgres:
