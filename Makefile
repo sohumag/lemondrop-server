@@ -17,3 +17,6 @@ docker:
 run:
 	go build -o bin ./...
 	./bin/cmd
+
+test:
+	go test ./...

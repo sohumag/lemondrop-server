@@ -37,7 +37,7 @@ func (s *UserServer) StartUserServerAPI(api fiber.Router) error {
 
 	// USERS
 	usersApi := api.Group("/users")
-	usersApi.Get("/", func(c *fiber.Ctx) error {
+	usersApi.Post("/", func(c *fiber.Ctx) error {
 		return s.AddUserToDB(c)
 	})
 
@@ -46,6 +46,7 @@ func (s *UserServer) StartUserServerAPI(api fiber.Router) error {
 
 func (s *UserServer) AddUserToDB(c *fiber.Ctx) error {
 	bodyRaw := strings.Trim(string(c.Body()), " \n{}")
+
 	toks := strings.Split(bodyRaw, ",")
 
 	pieces := map[string]string{}
