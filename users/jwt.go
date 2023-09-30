@@ -44,13 +44,11 @@ func ValidateJWT(jwtToken string) (string, error) {
 	if !token.Valid {
 		return "", fmt.Errorf("invalid token")
 	}
-
 	return userClaim.Email, nil
 }
 
-func ParseRequest(c *fiber.Ctx) (string, error) {
+func ParseRequestForJWT(c *fiber.Ctx) (string, error) {
 	val := c.Request().Header.Peek("Bearer-Token")
-	fmt.Printf("bearer: %s\n", val)
 	if string(val) == "" {
 		return "", fmt.Errorf("no token in header")
 	}
