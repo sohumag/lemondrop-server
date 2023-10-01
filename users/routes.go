@@ -46,19 +46,13 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 	// adding user to database
 	coll := s.client.Database("users-db").Collection("users")
 
-	if err := coll.FindOne(context.TODO(), bson.D{{Key: "email", Value: user.Email}}); err != nil {
-		// user is new
-		result, err := coll.InsertOne(context.TODO(), &user)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("added user with id: %v\n", result.InsertedID)
-	} else {
-		// user exists already
-		c.SendStatus(http.StatusBadRequest)
-		return fiber.ErrBadRequest
+	result, err := coll.InsertOne(context.TODO(), &user)
+	if err != nil {
+		fmt.Println(err)
+		return err
 	}
+
+	fmt.Printf("added user with id: %v\n", result.InsertedID)
 
 	jwt, err := GenerateJWT(user.Email)
 	if err != nil {

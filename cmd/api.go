@@ -8,6 +8,7 @@ import (
 	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/news"
 	"github.com/rlvgl/bookie-server/users"
+	"github.com/rlvgl/bookie-server/wheels"
 )
 
 func StartAPI(port int) error {
@@ -33,6 +34,10 @@ func StartAPI(port int) error {
 	// USER SERVER ------------------------
 	us := users.NewUserServer()
 	us.Start(api)
+
+	// WHEELS SERVER ----------------------
+	ws := wheels.NewWheelServer()
+	ws.Start(api)
 
 	// log.Printf("Starting API on port %d\n", port)
 	app.Listen(fmt.Sprintf(":%d", port))
