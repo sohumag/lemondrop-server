@@ -13,6 +13,7 @@ type User struct {
 	PhoneNumber string `json:"phone_number"`
 	Email       string `json:"email"`
 	Password    string `json:"password"`
+	JWT         string `json:"jwt"`
 
 	// Collected
 	UserId              int64     `json:"user_id"`
@@ -30,6 +31,9 @@ type UserServer struct {
 type ClientUser struct {
 	FirstName           string    `json:"first_name"`
 	LastName            string    `json:"last_name"`
+	PhoneNumber         string    `json:"phone_number"`
+	Email               string    `json:"email"`
+	JWT                 string    `json:"jwt"`
 	UserId              int64     `json:"user_id"`
 	DateJoined          time.Time `json:"date_joined"`
 	CurrentBalance      float64   `json:"current_balance"`

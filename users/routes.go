@@ -70,10 +70,12 @@ func (s *UserServer) HandleLoginRoute(c *fiber.Ctx) error {
 	if err != nil {
 		// invalid token
 		if err.Error() == "invalid token" {
+			fmt.Println("invalid token")
 			c.SendStatus(http.StatusBadRequest)
 		}
 		if err.Error() == "no token in header" {
 			// fmt.Println("login without jwt")
+			fmt.Println("no token in header")
 			s.HandleLoginWithoutJWT(c)
 		}
 	} else {
@@ -113,7 +115,29 @@ func (s *UserServer) HandleLoginWithoutJWT(c *fiber.Ctx) error {
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err == nil {
 		// user logged in correctly
-		c.JSON(user)
+		jwt, err := GenerateJWT(user.Email)
+		if err != nil {
+			return err
+		}
+
+		cuser := ClientUser{
+			FirstName:   user.FirstName,
+			LastName:    user.LastName,
+			PhoneNumber: user.PhoneNumber,
+			Email:       user.Email,
+			JWT:         jwt,
+
+			UserId:              user.UserId,
+			DateJoined:          user.DateJoined,
+			CurrentBalance:      user.CurrentBalance,
+			CurrentAvailability: user.CurrentAvailability,
+			CurrentFreePlay:     user.CurrentFreePlay,
+			CurrentPending:      user.CurrentPending,
+		}
+
+		user.JWT = jwt
+
+		c.JSON(cuser)
 	} else {
 		c.SendStatus(http.StatusBadRequest)
 	}
