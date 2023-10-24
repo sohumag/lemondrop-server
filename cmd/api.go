@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/rlvgl/bookie-server/bets"
 	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/news"
 	"github.com/rlvgl/bookie-server/users"
@@ -25,7 +26,7 @@ func StartAPI(port int) error {
 	gs := games.NewGameServer()
 	gs.Start(api)
 
-	// gs.MigrateAllGames()
+	gs.MigrateAllGames()
 
 	// NEWS SERVER ------------------------
 	ns := news.NewNewsServer()
@@ -38,6 +39,14 @@ func StartAPI(port int) error {
 	// WHEELS SERVER ----------------------
 	ws := wheels.NewWheelServer()
 	ws.Start(api)
+
+	bs := bets.NewBetServer()
+	bs.Start(api)
+
+	// ps := props.NewPropServer()
+	// ps.Start(api)
+	// ps.GetAllPropsGames()
+	// ps.ScrapeAllBovadaSports()
 
 	// log.Printf("Starting API on port %d\n", port)
 	app.Listen(fmt.Sprintf(":%d", port))

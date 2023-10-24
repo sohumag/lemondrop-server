@@ -34,7 +34,7 @@ type ClientUser struct {
 	PhoneNumber         string    `json:"phone_number"`
 	Email               string    `json:"email"`
 	JWT                 string    `json:"jwt"`
-	UserId              int64     `json:"user_id"`
+	UserId              int64     `json:"user_id" bson:"user_id"`
 	DateJoined          time.Time `json:"date_joined"`
 	CurrentBalance      float64   `json:"current_balance"`
 	CurrentAvailability float64   `json:"current_availability"`
