@@ -63,6 +63,10 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 
 	// Games
 	gamesApi := api.Group("/games")
+	gamesApi.Get("/game/:id", func(c *fiber.Ctx) error {
+		return s.ReturnGameById(c, c.Params("id"))
+	})
+
 	gamesApi.Get("/:league", func(c *fiber.Ctx) error {
 		return s.CacheAndReturnGamesByLeague(c, c.Params("league"))
 	})
