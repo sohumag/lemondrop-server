@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/rlvgl/bookie-server/bets"
 	"github.com/rlvgl/bookie-server/games"
+	"github.com/rlvgl/bookie-server/markets"
 	"github.com/rlvgl/bookie-server/news"
 	"github.com/rlvgl/bookie-server/users"
 	"github.com/rlvgl/bookie-server/wheels"
@@ -22,11 +23,19 @@ func StartAPI(port int) error {
 		return c.SendString("API is running")
 	})
 
-	// GAME SERVER ------------------------
 	gs := games.NewGameServer()
 	gs.Start(api)
 
-	gs.MigrateAllGames()
+	// ARCHIVED GAME SERVER ------------------------
+	// gs := games.NewGameServer()
+	// gs.Start(api)
+
+	// go func() {
+	// 	s := gocron.NewScheduler(time.UTC)
+	// 	s.Every(4).Hours().Do(func() {
+	// 		gs.MigrateAllGames()
+	// 	})
+	// }()
 
 	// NEWS SERVER ------------------------
 	ns := news.NewNewsServer()
@@ -42,6 +51,9 @@ func StartAPI(port int) error {
 
 	bs := bets.NewBetServer()
 	bs.Start(api)
+
+	ms := markets.NewMarketServer()
+	ms.Start(api)
 
 	// ps := props.NewPropServer()
 	// ps.Start(api)
