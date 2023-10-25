@@ -31,12 +31,12 @@ var validLeagues = []string{
 
 func NewGameServer() *GameServer {
 	log := map[string]time.Time{}
-	cache := map[string][]Game{}
+	cache := map[string][]ParsedGame{}
 
 	for _, leagueName := range validLeagues {
 		log[leagueName] = time.Now()
 		//? initializing empty cache to start. maybe change later
-		cache[leagueName] = []Game{}
+		cache[leagueName] = []ParsedGame{}
 	}
 
 	return &GameServer{
@@ -71,7 +71,7 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 }
 
 func (s *GameServer) CacheAndReturnGamesByLeague(c *fiber.Ctx, league string) error {
-	maxTimeBeforeUpdate := 8 * time.Hour
+	maxTimeBeforeUpdate := 24 * time.Hour
 	if err := ValidateLeagueExists(league); err != nil {
 		c.Send([]byte(err.Error()))
 	}
@@ -105,6 +105,8 @@ func (s *GameServer) CacheAndReturnGamesByLeague(c *fiber.Ctx, league string) er
 }
 
 func (s *GameServer) Start(api fiber.Router) error {
+	// s.ClearDatabase()
+	// s.GetAllGamesAndLogs()
 	s.InitGamesAndLogs()
 	return s.StartGameServerAPI(api)
 }

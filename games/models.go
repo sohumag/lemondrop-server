@@ -12,10 +12,36 @@ type GameServer struct {
 }
 
 type Cache struct {
-	// map[leagueName] -> lastUpdated
-	// map[leagueName] -> []Games
 	updateLog map[string]time.Time
-	gameCache map[string][]Game
+	gameCache map[string][]ParsedGame
+}
+
+type ParsedGame struct {
+	Id           string    `json:"id" bson:"game_id"`
+	SportKey     string    `json:"sport_key" bson:"sport_key"`
+	SportTitle   string    `json:"sport_title" bson:"sport_title"`
+	CommenceTime time.Time `json:"commence_time" bson:"commence_time"`
+	HomeTeam     string    `json:"home_team" bson:"home_team"`
+	AwayTeam     string    `json:"away_team" bson:"away_team"`
+
+	LastUpdate string `json:"last_update" bson:"last_update"`
+
+	MoneylinesExist bool `json:"moneylines_exist"`
+	SpreadsExist    bool `json:"spreads_exist"`
+	TotalsExist     bool `json:"total_exist"`
+
+	HomeMoneylinePrice float64 `json:"home_moneyline_price"`
+	AwayMoneylinePrice float64 `json:"away_moneyline_price"`
+
+	HomeSpreadPrice float64 `json:"home_spread_price"`
+	AwaySpreadPrice float64 `json:"away_spread_price"`
+	HomeSpreadPoint float64 `json:"home_spread_point"`
+	AwaySpreadPoint float64 `json:"away_spread_point"`
+
+	OverPrice  float64 `json:"over_price"`
+	UnderPrice float64 `json:"under_price"`
+	OverPoint  float64 `json:"over_point"`
+	UnderPoint float64 `json:"under_point"`
 }
 
 type Game struct {

@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"slices"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,19 +24,99 @@ func (c *Cache) TimeSinceLastUpdate(league string) (time.Duration, error) {
 	return timeSince, nil
 }
 
-func (s *GameServer) UpdateGameCacheAndLog(league string, games []Game) error {
-	// only need max 3 bookmakers
-	maxBookmakers := 1
-	for i, game := range games {
-		newGame := game
-		if len(game.Bookmakers) > maxBookmakers {
-			newGame.Bookmakers = game.Bookmakers[0:maxBookmakers]
-		}
+func (s *GameServer) ParseGame(game Game) (ParsedGame, error) {
+	//! IMPROVEMENT: IF ONE MARKET DOESNT EXIST, CHECK OTHER BOOKS FOR IT
+	// get draftkings bookmaker if exists
+	// if doesnt exist, take first bookmaker
 
-		games[i] = newGame
+	// check what markets exist
+	// Fill in fields based on markets that exist
+
+	parsedGame := ParsedGame{
+		Id:              game.Id,
+		SportKey:        game.SportKey,
+		SportTitle:      game.SportTitle,
+		CommenceTime:    game.CommenceTime,
+		HomeTeam:        game.HomeTeam,
+		AwayTeam:        game.AwayTeam,
+		MoneylinesExist: false,
+		SpreadsExist:    false,
+		TotalsExist:     false,
 	}
 
-	s.cache.gameCache[league] = games
+	usedBook := Bookmaker{}
+
+	allBookKeys := []string{}
+	for _, book := range game.Bookmakers {
+		allBookKeys = append(allBookKeys, book.Key)
+	}
+
+	if slices.Contains(allBookKeys, "draftkings") {
+		for j, book := range game.Bookmakers {
+			if book.Key == "draftkings" {
+				usedBook = game.Bookmakers[j]
+			}
+		}
+	} else {
+		usedBook = game.Bookmakers[0]
+	}
+
+	for _, market := range usedBook.Markets {
+		parsedGame.LastUpdate = market.LastUpdate
+		if market.Key == "h2h" {
+			parsedGame.MoneylinesExist = true
+
+			if market.Outcomes[0].Name == game.HomeTeam {
+				parsedGame.HomeMoneylinePrice = market.Outcomes[0].Price
+				parsedGame.AwayMoneylinePrice = market.Outcomes[1].Price
+			} else {
+				parsedGame.HomeMoneylinePrice = market.Outcomes[1].Price
+				parsedGame.AwayMoneylinePrice = market.Outcomes[0].Price
+			}
+
+		} else if market.Key == "spreads" {
+			parsedGame.SpreadsExist = true
+
+			if market.Outcomes[0].Name == game.HomeTeam {
+				parsedGame.HomeSpreadPoint = market.Outcomes[0].Point
+				parsedGame.HomeSpreadPrice = market.Outcomes[0].Price
+				parsedGame.AwaySpreadPoint = market.Outcomes[1].Point
+				parsedGame.AwaySpreadPrice = market.Outcomes[1].Price
+			} else {
+				parsedGame.HomeSpreadPoint = market.Outcomes[1].Point
+				parsedGame.HomeSpreadPrice = market.Outcomes[1].Price
+				parsedGame.AwaySpreadPoint = market.Outcomes[0].Point
+				parsedGame.AwaySpreadPrice = market.Outcomes[0].Price
+			}
+
+		} else if market.Key == "totals" {
+			parsedGame.TotalsExist = true
+			parsedGame.OverPoint = market.Outcomes[0].Point
+			parsedGame.OverPrice = market.Outcomes[0].Price
+			parsedGame.UnderPoint = market.Outcomes[1].Point
+			parsedGame.UnderPrice = market.Outcomes[1].Price
+		}
+	}
+
+	return parsedGame, nil
+}
+
+func (s *GameServer) UpdateGameCacheAndLog(league string, games []Game) error {
+	// only need max 3 bookmakers
+	// only want draftkings odds bc others dont always have all markets
+	parsedGames := []ParsedGame{}
+	// maxBookmakers := 1
+	for _, game := range games {
+		parsedGame, err := s.ParseGame(game)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+
+		parsedGames = append(parsedGames, parsedGame)
+	}
+
+	s.cache.gameCache[league] = parsedGames
 	s.cache.updateLog[league] = time.Now()
 	return nil
 }
@@ -56,7 +138,7 @@ func (s *GameServer) GetAllGamesAndLogs() error {
 
 func (s *GameServer) GetAllGamesByLeague(league string) ([]Game, error) {
 	apiKey := os.Getenv("ODDS_API_KEY")
-	reqUrl := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/odds?api_key=%s&regions=us&markets=h2h,totals,spreads", league, apiKey)
+	reqUrl := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/odds?api_key=%s&regions=us&markets=h2h,totals,spreads&oddsFormat=american", league, apiKey)
 	res, err := http.Get(reqUrl)
 
 	if err != nil {
@@ -83,8 +165,15 @@ func (s *GameServer) AddNewGamesToDB(games []Game) error {
 
 	// if speed is issue, can do concurrently
 	for _, game := range games {
+		// check if game exists: if so delete
+		filter := bson.M{"game_id": game.Id}
+		if _, err := coll.DeleteOne(context.TODO(), filter); err != nil {
+			log.Println(err.Error())
+		}
+
 		res, err := coll.InsertOne(context.TODO(), game)
 		if err != nil {
+			fmt.Println(err.Error())
 			return err
 		}
 
@@ -101,7 +190,7 @@ func (s *GameServer) InitGamesAndLogs() error {
 
 	totalGames := 0
 	for _, league := range validLeagues {
-		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now()}}
+		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now(), "$lt": time.Now().Add(time.Hour * 24 * 5)}}
 
 		cursor, err := coll.Find(context.TODO(), filter)
 		if err != nil {
@@ -126,17 +215,15 @@ func (s *GameServer) InitGamesAndLogs() error {
 
 // !!!! DANGER
 func (s *GameServer) ClearDatabase() error {
-	// coll := s.client.Database("backup").Collection("games")
+	coll := s.client.Database("backup").Collection("games")
 
-	// filter := bson.D{{}}
-	// res, err := coll.DeleteMany(context.TODO(), filter)
+	filter := bson.D{{}}
+	res, err := coll.DeleteMany(context.TODO(), filter)
 
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
-	// fmt.Printf("Deleted %d games from database\n", res.DeletedCount)
-	// return err
-
-	return nil
+	fmt.Printf("Deleted %d games from database\n", res.DeletedCount)
+	return err
 }
