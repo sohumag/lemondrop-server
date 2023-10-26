@@ -190,7 +190,8 @@ func (s *GameServer) InitGamesAndLogs() error {
 
 	totalGames := 0
 	for _, league := range validLeagues {
-		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now(), "$lt": time.Now().Add(time.Hour * 24 * 5)}}
+		fmt.Println(league)
+		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now()}}
 
 		cursor, err := coll.Find(context.TODO(), filter)
 		if err != nil {
@@ -203,6 +204,10 @@ func (s *GameServer) InitGamesAndLogs() error {
 			fmt.Println(err.Error())
 			return err
 		}
+
+		// for _, game := range games {
+		// 	fmt.Println(game.SportTitle)
+		// }
 
 		s.UpdateGameCacheAndLog(league, games)
 

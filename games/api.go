@@ -27,6 +27,8 @@ var validLeagues = []string{
 	"basketball_ncaab",
 
 	"icehockey_nhl",
+
+	"soccer_uefa_champs_league",
 }
 
 func NewGameServer() *GameServer {
