@@ -113,6 +113,9 @@ func (s *GameServer) CacheAndReturnGamesByLeague(c *fiber.Ctx, league string) er
 func (s *GameServer) Start(api fiber.Router) error {
 	// s.ClearDatabase()
 	// s.GetAllGamesAndLogs()
+
+	// implement auto updates for mongo fetches
+
 	s.InitGamesAndLogs()
 	return s.StartGameServerAPI(api)
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -17,6 +16,7 @@ func (c *Cache) TimeSinceLastUpdate(league string) (time.Duration, error) {
 	if err := ValidateLeagueExists(league); err != nil {
 		return time.Since(time.Now()), err
 	}
+
 	lastUpdate := c.updateLog[league]
 
 	timeSince := time.Since(lastUpdate)
@@ -101,21 +101,41 @@ func (s *GameServer) ParseGame(game Game) (ParsedGame, error) {
 }
 
 func (s *GameServer) UpdateGameCacheAndLog(league string, games []Game) error {
-	// only need max 3 bookmakers
-	// only want draftkings odds bc others dont always have all markets
-	parsedGames := []ParsedGame{}
-	// maxBookmakers := 1
+	// new game cache
+	// add all old games that are in future
+	// add all new games that arent already in it
+	oldGames := s.cache.gameCache[league]
+	addedGames := []ParsedGame{}
 	for _, game := range games {
 		parsedGame, err := s.ParseGame(game)
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
-
-		parsedGames = append(parsedGames, parsedGame)
+		addedGames = append(addedGames, parsedGame)
 	}
 
-	s.cache.gameCache[league] = parsedGames
+	newGames := []ParsedGame{}
+	for _, game := range oldGames {
+		if game.CommenceTime.After(time.Now()) {
+			newGames = append(newGames, game)
+		}
+	}
+
+	for _, game := range addedGames {
+		gameAlreadyExists := false
+		for _, compareGame := range newGames {
+			if game.Id == compareGame.Id {
+				gameAlreadyExists = true
+			}
+		}
+
+		if !gameAlreadyExists {
+			newGames = append(newGames, game)
+		}
+	}
+
+	s.cache.gameCache[league] = addedGames
 	s.cache.updateLog[league] = time.Now()
 	return nil
 }
@@ -138,6 +158,7 @@ func (s *GameServer) GetAllGamesAndLogs() error {
 func (s *GameServer) GetAllGamesByLeague(league string) ([]Game, error) {
 	apiKey := os.Getenv("ODDS_API_KEY")
 	reqUrl := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/odds?api_key=%s&regions=us&markets=h2h,totals,spreads&oddsFormat=american", league, apiKey)
+	// reqUrl := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/odds?api_key=%s&regions=us&markets=h2h&oddsFormat=american", league, apiKey)
 	res, err := http.Get(reqUrl)
 
 	if err != nil {
@@ -155,6 +176,10 @@ func (s *GameServer) GetAllGamesByLeague(league string) ([]Game, error) {
 	games := []Game{}
 	json.Unmarshal(bytes, &games)
 
+	for _, game := range games {
+		fmt.Printf("%v@%v: %v\n", game.AwayTeam, game.HomeTeam, game.CommenceTime)
+	}
+
 	return games, nil
 }
 
@@ -164,16 +189,9 @@ func (s *GameServer) AddNewGamesToDB(games []Game) error {
 
 	// if speed is issue, can do concurrently
 	for _, game := range games {
-		// check if game exists: if so delete
-		filter := bson.M{"game_id": game.Id}
-		if _, err := coll.DeleteOne(context.TODO(), filter); err != nil {
-			log.Println(err.Error())
-		}
-
 		res, err := coll.InsertOne(context.TODO(), game)
 		if err != nil {
-			fmt.Println(err.Error())
-			return err
+			fmt.Println(err)
 		}
 
 		fmt.Printf("Inserted game with id: %v\n", res.InsertedID)
@@ -189,7 +207,6 @@ func (s *GameServer) InitGamesAndLogs() error {
 
 	totalGames := 0
 	for _, league := range validLeagues {
-		fmt.Println(league)
 		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now()}}
 
 		cursor, err := coll.Find(context.TODO(), filter)
