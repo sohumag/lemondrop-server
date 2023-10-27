@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"slices"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -33,34 +32,29 @@ func (s *GameServer) ParseGame(game Game) (ParsedGame, error) {
 	// Fill in fields based on markets that exist
 
 	parsedGame := ParsedGame{
-		Id:              game.Id,
-		SportKey:        game.SportKey,
-		SportTitle:      game.SportTitle,
-		CommenceTime:    game.CommenceTime,
-		HomeTeam:        game.HomeTeam,
-		AwayTeam:        game.AwayTeam,
-		MoneylinesExist: false,
-		SpreadsExist:    false,
-		TotalsExist:     false,
+		Id:                  game.Id,
+		SportKey:            game.SportKey,
+		SportTitle:          game.SportTitle,
+		CommenceTime:        game.CommenceTime,
+		HomeTeam:            game.HomeTeam,
+		AwayTeam:            game.AwayTeam,
+		MoneylinesExist:     false,
+		SpreadsExist:        false,
+		TotalsExist:         false,
+		DrawMoneylineExists: false,
 	}
 
+	// choosing book to use
+	maxMarkets := 0
 	usedBook := Bookmaker{}
-
-	allBookKeys := []string{}
 	for _, book := range game.Bookmakers {
-		allBookKeys = append(allBookKeys, book.Key)
-	}
-
-	if slices.Contains(allBookKeys, "draftkings") {
-		for j, book := range game.Bookmakers {
-			if book.Key == "draftkings" {
-				usedBook = game.Bookmakers[j]
-			}
+		if len(book.Markets) > maxMarkets {
+			maxMarkets = len(book.Markets)
+			usedBook = book
 		}
-	} else {
-		usedBook = game.Bookmakers[0]
 	}
 
+	// parsing book
 	for _, market := range usedBook.Markets {
 		parsedGame.LastUpdate = market.LastUpdate
 		if market.Key == "h2h" {
@@ -72,6 +66,11 @@ func (s *GameServer) ParseGame(game Game) (ParsedGame, error) {
 			} else {
 				parsedGame.HomeMoneylinePrice = market.Outcomes[1].Price
 				parsedGame.AwayMoneylinePrice = market.Outcomes[0].Price
+			}
+
+			if len(market.Outcomes) >= 3 {
+				parsedGame.DrawMoneylineExists = true
+				parsedGame.DrawMoneylinePrice = market.Outcomes[2].Price
 			}
 
 		} else if market.Key == "spreads" {

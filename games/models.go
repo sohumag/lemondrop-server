@@ -30,8 +30,10 @@ type ParsedGame struct {
 	SpreadsExist    bool `json:"spreads_exist"`
 	TotalsExist     bool `json:"totals_exist"`
 
-	HomeMoneylinePrice float64 `json:"home_moneyline_price"`
-	AwayMoneylinePrice float64 `json:"away_moneyline_price"`
+	HomeMoneylinePrice  float64 `json:"home_moneyline_price"`
+	AwayMoneylinePrice  float64 `json:"away_moneyline_price"`
+	DrawMoneylineExists bool    `json:"draw_moneyline_exists"`
+	DrawMoneylinePrice  float64 `json:"draw_moneyline_price"`
 
 	HomeSpreadPrice float64 `json:"home_spread_price"`
 	AwaySpreadPrice float64 `json:"away_spread_price"`
