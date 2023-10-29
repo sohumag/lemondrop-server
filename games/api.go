@@ -119,3 +119,15 @@ func (s *GameServer) Start(api fiber.Router) error {
 	s.InitGamesAndLogs()
 	return s.StartGameServerAPI(api)
 }
+
+/*
+
+- Start: Get all games from mongo and put into cache
+- Get Games: get all games from api and test if already exists. Update if it does. Add if it doesnt
+- Update cache(games)
+
+endpoints:
+	- be able to get games by league(simple)
+	- get by sport (all leagues...)
+	- get all games .. sort by league
+*/

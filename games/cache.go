@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (c *Cache) TimeSinceLastUpdate(league string) (time.Duration, error) {
@@ -101,41 +102,32 @@ func (s *GameServer) ParseGame(game Game) (ParsedGame, error) {
 }
 
 func (s *GameServer) UpdateGameCacheAndLog(league string, games []Game) error {
-	// new game cache
-	// add all old games that are in future
-	// add all new games that arent already in it
-	oldGames := s.cache.gameCache[league]
-	addedGames := []ParsedGame{}
+	/*
+		in: sorted array of game objects with potential duplicates
+		algo: go thru array0 and create a new array empty and map
+			arrayiterate over array 0 and add to new array if not already exists in map
+		out: sorted array of unique game objects
+	*/
+
+	uniqueGames := []ParsedGame{}
+	existsMap := map[string]bool{} //
+
 	for _, game := range games {
+		// if exists in map: return
+		if _, ok := existsMap[game.Id]; ok {
+			continue
+		}
+
+		// else: add game to unique games and add to exists map
 		parsedGame, err := s.ParseGame(game)
 		if err != nil {
-			fmt.Println(err)
 			return err
 		}
-		addedGames = append(addedGames, parsedGame)
+		uniqueGames = append(uniqueGames, parsedGame)
+		existsMap[game.Id] = true
 	}
 
-	newGames := []ParsedGame{}
-	for _, game := range oldGames {
-		if game.CommenceTime.After(time.Now()) {
-			newGames = append(newGames, game)
-		}
-	}
-
-	for _, game := range addedGames {
-		gameAlreadyExists := false
-		for _, compareGame := range newGames {
-			if game.Id == compareGame.Id {
-				gameAlreadyExists = true
-			}
-		}
-
-		if !gameAlreadyExists {
-			newGames = append(newGames, game)
-		}
-	}
-
-	s.cache.gameCache[league] = addedGames
+	s.cache.gameCache[league] = uniqueGames
 	s.cache.updateLog[league] = time.Now()
 	return nil
 }
@@ -160,12 +152,10 @@ func (s *GameServer) GetAllGamesByLeague(league string) ([]Game, error) {
 	reqUrl := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/odds?api_key=%s&regions=us&markets=h2h,totals,spreads&oddsFormat=american", league, apiKey)
 	// reqUrl := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/odds?api_key=%s&regions=us&markets=h2h&oddsFormat=american", league, apiKey)
 	res, err := http.Get(reqUrl)
-
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
 	}
-
 	defer res.Body.Close()
 
 	bytes, err := io.ReadAll(res.Body)
@@ -184,7 +174,7 @@ func (s *GameServer) GetAllGamesByLeague(league string) ([]Game, error) {
 }
 
 func (s *GameServer) AddNewGamesToDB(games []Game) error {
-	// duplication error
+	// duplication error: deal with in cache function
 	coll := s.client.Database("backup").Collection("games")
 
 	// if speed is issue, can do concurrently
@@ -207,9 +197,10 @@ func (s *GameServer) InitGamesAndLogs() error {
 
 	totalGames := 0
 	for _, league := range validLeagues {
-		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now()}}
+		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now(), "$lt": time.Now().Add(time.Hour * 24 * 7)}}
+		opts := options.Find().SetSort(bson.D{{Key: "commence_time", Value: 1}})
 
-		cursor, err := coll.Find(context.TODO(), filter)
+		cursor, err := coll.Find(context.TODO(), filter, opts)
 		if err != nil {
 			fmt.Println(err.Error())
 			return err
@@ -221,12 +212,7 @@ func (s *GameServer) InitGamesAndLogs() error {
 			return err
 		}
 
-		// for _, game := range games {
-		// 	fmt.Println(game.SportTitle)
-		// }
-
 		s.UpdateGameCacheAndLog(league, games)
-
 		totalGames += len(games)
 	}
 

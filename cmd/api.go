@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/rlvgl/bookie-server/assetLookup"
 	"github.com/rlvgl/bookie-server/bets"
 	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/markets"
@@ -54,6 +55,9 @@ func StartAPI(port int) error {
 
 	ms := markets.NewMarketServer()
 	ms.Start(api)
+
+	as := assetLookup.NewAssetServer()
+	as.Start(api)
 
 	// ps := props.NewPropServer()
 	// ps.Start(api)
