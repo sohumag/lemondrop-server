@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -69,9 +70,41 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 		return s.ReturnGameById(c, c.Params("id"))
 	})
 
-	gamesApi.Get("/:league", func(c *fiber.Ctx) error {
+	gamesApi.Get("/league/:league", func(c *fiber.Ctx) error {
 		return s.CacheAndReturnGamesByLeague(c, c.Params("league"))
 	})
+
+	gamesApi.Get("/sport/:sport", func(c *fiber.Ctx) error {
+		return s.CacheAndReturnGamesBySport(c, c.Params("sport"))
+	})
+
+	return nil
+}
+
+func (s *GameServer) CacheAndReturnGamesBySport(c *fiber.Ctx, sport string) error {
+	sportLeagueMap := map[string][]string{
+		"football":   {"americanfootball_nfl", "americanfootball_ncaaf"},
+		"basketball": {"basketball_nba", "basketball_ncaaf"},
+		"hockey":     {"icehockey_nhl"},
+		"soccer":     {"soccer_uefa_champions_leauge"},
+	}
+
+	if _, ok := sportLeagueMap[sport]; !ok {
+		// sport doesnt exist
+		c.SendStatus(http.StatusBadRequest)
+		return nil
+	}
+
+	leagues := sportLeagueMap[sport]
+	allGames := []ParsedGame{}
+	for _, league := range leagues {
+		rawGames := s.cache.gameCache[league]
+		for _, game := range rawGames {
+			allGames = append(allGames, game)
+		}
+	}
+
+	c.JSON(allGames)
 
 	return nil
 }
@@ -121,11 +154,9 @@ func (s *GameServer) Start(api fiber.Router) error {
 }
 
 /*
-
 - Start: Get all games from mongo and put into cache
 - Get Games: get all games from api and test if already exists. Update if it does. Add if it doesnt
 - Update cache(games)
-
 endpoints:
 	- be able to get games by league(simple)
 	- get by sport (all leagues...)
