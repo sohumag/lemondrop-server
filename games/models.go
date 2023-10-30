@@ -14,6 +14,8 @@ type GameServer struct {
 type Cache struct {
 	updateLog map[string]time.Time
 	gameCache map[string][]ParsedGame
+	// needs to take game id and prop name and return prop options
+	// propsCache map[string]map[string][]string
 }
 
 type ParsedGame struct {
@@ -54,6 +56,7 @@ type Game struct {
 	HomeTeam     string      `json:"home_team" bson:"home_team"`
 	AwayTeam     string      `json:"away_team" bson:"away_team"`
 	Bookmakers   []Bookmaker `json:"bookmakers" bson:"bookmakers"`
+	PropMarkets  []Market    `json:"prop_markets" bson:"prop_markets"`
 }
 
 type Bookmaker struct {
@@ -70,7 +73,8 @@ type Market struct {
 }
 
 type Outcome struct {
-	Name  string  `json:"name" bson:"name"`
-	Price float64 `json:"price" bson:"price"`
-	Point float64 `json:"point" bson:"point"`
+	Name        string  `json:"name" bson:"name"`
+	Description string  `json:"description" bson:"description"`
+	Price       float64 `json:"price" bson:"price"`
+	Point       float64 `json:"point" bson:"point"`
 }

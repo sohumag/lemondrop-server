@@ -66,13 +66,23 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 
 	// Games
 	gamesApi := api.Group("/games")
+
+	// /props/:propname
+	// needs to use straight mongo bc cache will not be large enough
+	gamesApi.Get("/league/:league/game/:id/props/:prop", func(c *fiber.Ctx) error {
+		return s.ReturnPropsByIdAndPropName(c, c.Params("league"), c.Params("id"), c.Params("prop"))
+	})
+
 	gamesApi.Get("/game/:id", func(c *fiber.Ctx) error {
 		return s.ReturnGameById(c, c.Params("id"))
 	})
 
+	// TODO
 	gamesApi.Get("/league/:league", func(c *fiber.Ctx) error {
 		return s.CacheAndReturnGamesByLeague(c, c.Params("league"))
 	})
+
+	// TODO: Add /all endpoint
 
 	gamesApi.Get("/sport/:sport", func(c *fiber.Ctx) error {
 		return s.CacheAndReturnGamesBySport(c, c.Params("sport"))
