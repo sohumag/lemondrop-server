@@ -18,6 +18,11 @@ func StartAPI(port int) error {
 	app := fiber.New()
 	app.Use(cors.New())
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:5173, https://lemondrop.bet",
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
+
 	// API Group Router
 	api := app.Group("/api")
 	api.Get("/", func(c *fiber.Ctx) error {
