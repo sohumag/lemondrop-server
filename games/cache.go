@@ -197,7 +197,7 @@ func (s *GameServer) InitGamesAndLogs() error {
 
 	totalGames := 0
 	for _, league := range validLeagues {
-		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now(), "$lt": time.Now().Add(time.Hour * 24 * 7)}}
+		filter := bson.M{"sport_key": league, "commence_time": bson.M{"$gt": time.Now(), "$lt": time.Now().Add(time.Hour * 24 * 3)}}
 		opts := options.Find().SetSort(bson.D{{Key: "commence_time", Value: 1}})
 
 		cursor, err := coll.Find(context.TODO(), filter, opts)

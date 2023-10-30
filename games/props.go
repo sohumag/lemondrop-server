@@ -94,6 +94,7 @@ func (s *GameServer) AddPropDataToDB(gameId string, propName string, market Mark
 func (s *GameServer) GetPropsFromApi(league, gameId, propName string) (Market, error) {
 	apiKey := os.Getenv("ODDS_API_KEY")
 	url := fmt.Sprintf("https://api.the-odds-api.com/v4/sports/%s/events/%s/odds?apiKey=%s&regions=us&markets=%s&oddsFormat=american", league, gameId, apiKey, propName)
+	fmt.Println(url)
 	res, err := http.Get(url)
 	if err != nil {
 		return Market{}, err
@@ -107,6 +108,9 @@ func (s *GameServer) GetPropsFromApi(league, gameId, propName string) (Market, e
 
 	game := Game{}
 	json.Unmarshal(bytes, &game)
+	if len(game.Bookmakers) == 0 {
+		return Market{}, fmt.Errorf("no props for market")
+	}
 	propMarket := game.Bookmakers[0].Markets[0]
 	return propMarket, nil
 }
