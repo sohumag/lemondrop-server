@@ -2,7 +2,6 @@ package bets
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -14,14 +13,10 @@ import (
 )
 
 func NewBetServer() *BetServer {
-	return &BetServer{
-		client: ConnectDB(),
-	}
+	return &BetServer{client: ConnectDB()}
 }
 
-type BetServer struct {
-	client *mongo.Client
-}
+type BetServer struct{ client *mongo.Client }
 
 func ConnectDB() *mongo.Client {
 	uri := os.Getenv("MONGO_URI")
@@ -42,8 +37,16 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 		return nil
 	})
 
-	betsApi.Post("/add", func(c *fiber.Ctx) error {
+	betsApi.Post("/bet", func(c *fiber.Ctx) error {
 		return s.AddBetToDB(c)
+	})
+
+	betsApi.Get("/bet/user", func(c *fiber.Ctx) error {
+		return s.GetAllBetsByUserId(c)
+	})
+
+	betsApi.Get("/all", func(c *fiber.Ctx) error {
+		return s.GetAllBets(c)
 	})
 
 	return nil
@@ -55,6 +58,7 @@ func (s *BetServer) Start(api fiber.Router) error {
 }
 
 type Bet struct {
+	// user information
 	UserId           string  `json:"user_id"`
 	UserEmail        string  `json:"user_email"`
 	UserBalance      float64 `json:"user_balance"`
@@ -62,32 +66,21 @@ type Bet struct {
 	UserPending      float64 `json:"user_pending"`
 	UserFreePlay     float64 `json:"user_free_play"`
 
+	// game information
 	GameId        string    `json:"game_id"`
 	HomeTeam      string    `json:"home_team"`
 	AwayTeam      string    `json:"away_team"`
 	GameStartTime time.Time `json:"game_start_time"`
 
-	BetType   string  `json:"bet_type"`
-	BetOnTeam string  `json:"bet_on_team"`
-	BetPoint  float64 `json:"bet_point"`
-	BetPrice  float64 `json:"bet_price"`
-	BetAmount float64 `json:"bet_amount"`
-
-	BetCashed bool `json:"bet_cashed"`
-}
-
-func (s *BetServer) AddBetToDB(c *fiber.Ctx) error {
-	bet := &Bet{}
-	if err := c.BodyParser(&bet); err != nil {
-		fmt.Println(err)
-	}
-
-	coll := s.client.Database("bets-db").Collection("bets")
-	result, err := coll.InsertOne(context.TODO(), &bet)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Printf("Bet placed with id: %v\n", result.InsertedID)
-	return nil
+	// bet information
+	BetId       string  `json:"bet_id"`
+	BetType     string  `json:"bet_type"`
+	BetOnTeam   string  `json:"bet_on_team"`
+	BetCategory string  `json:"bet_category"` // for player props etc: really bet description
+	BetPoint    float64 `json:"bet_point"`
+	BetPrice    float64 `json:"bet_price"`
+	BetAmount   float64 `json:"bet_amount"`
+	BetVerified bool    `json:"bet_verified"`
+	BetCashed   bool    `json:"bet_cashed"`
+	BetStatus   string  `json:"bet_status"`
 }

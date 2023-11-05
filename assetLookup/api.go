@@ -43,7 +43,11 @@ func (s *AssetServer) StartAssetServerAPI(api fiber.Router) error {
 		teamName := ConvertRawString(c.Params("teamName"))
 
 		if leagueParsed == "nfl" || leagueParsed == "nba" || leagueParsed == "nhl" {
-			url := fmt.Sprintf("https://assets.sportsbook.fanduel.com/images/team/%s/%s.png", leagueParsed, teamName)
+			url := fmt.Sprintf(
+				"https://assets.sportsbook.fanduel.com/images/team/%s/%s.png",
+				leagueParsed,
+				teamName,
+			)
 			c.Write([]byte(url))
 		} else if leagueParsed == "ncaaf" {
 			url := s.GetCollegeFootballLogo()

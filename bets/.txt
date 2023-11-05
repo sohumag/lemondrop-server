@@ -1,0 +1,55 @@
+FEATURES:
+- users can add bets on future games
+- users can view all past bets
+	- on date placed
+	- highest winning
+	- filter to only winning
+	- on current status of bet
+
+- needs to have different statuses of bets: pending, cashed, failed
+- get aggregate info on users: total bets placed, total sum, total won, free play
+
+- admin needs to get all bets by date
+- admin should see payment management
+
+- needs to deal with payments and checking if games have won or not
+	- be able to update user information on backend?
+- needs to be able to create charges to users after game conclusion and give out payments
+
+
+- needs very good error handling to be able to reject invalid bets
+
+
+SPECIFICS:
+- invalid bets:
+	- placed after game takes place
+	- odds for game arent aligned with wager/to-win. check with games db
+	- needs to have valid gameid and user id
+	- needs to have valid payment information and user must have enough on card 
+
+
+API:
+- POST /bet
+- GET /bet Body: {userid, BetId}
+- GET /profile ** maybe move to user package
+
+b1: 100 at -110 cashes
+b2: 100 at -110 fails
+
+total out is 190.1
+total in is 200
+
+
+TRANSACTION PROCESSING...
+
+In 2 transactions:
+	- processor takes 61.7% of profit
+	- effective juice: 1.89%
+
+In 1 transactin at end of week...
+	- processor takes 0.59% of profit
+	- effective juice: 4.92%
+
+1. given in 2 transactions of +90.1, -100: 3.788/200 = 1.89% *** closer to ~2.2% on larger bets TOTAL JUICE: 3.1%
+3. given in 1 transaction(end of week) of -9.9 = .5871/200 = 0.29% TOTAL JUICE: 4.95%
+// dont  even worry lol 2. given in 3 transactions of -100, +190.1, -100 = ~-1%  

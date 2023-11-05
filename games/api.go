@@ -20,6 +20,10 @@ NOTES: should automatically send whatever is in cache, and then async fetch new 
 - bloom filter?
 */
 
+func ReturnAllLeagues() []string {
+	return validLeagues
+}
+
 var validLeagues = []string{
 	"americanfootball_nfl",
 	"americanfootball_ncaaf",

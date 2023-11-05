@@ -31,10 +31,11 @@ func GenerateJWT(email string) (string, error) {
 
 // returns email, err
 func ValidateJWT(jwtToken string) (string, error) {
+
 	var userClaim UserClaim
 
 	token, err := jwt.ParseWithClaims(jwtToken, &userClaim, func(token *jwt.Token) (any, error) {
-		return secretKey, nil
+		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 	})
 
 	if err != nil {
@@ -44,6 +45,7 @@ func ValidateJWT(jwtToken string) (string, error) {
 	if !token.Valid {
 		return "", fmt.Errorf("invalid token")
 	}
+
 	return userClaim.Email, nil
 }
 

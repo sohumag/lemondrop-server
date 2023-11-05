@@ -10,6 +10,7 @@ import (
 	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/markets"
 	"github.com/rlvgl/bookie-server/news"
+	"github.com/rlvgl/bookie-server/scores"
 	"github.com/rlvgl/bookie-server/users"
 	"github.com/rlvgl/bookie-server/wheels"
 )
@@ -63,6 +64,9 @@ func StartAPI(port int) error {
 
 	as := assetLookup.NewAssetServer()
 	as.Start(api)
+
+	ss := scores.NewScoreServer()
+	ss.Start(api)
 
 	// ps := props.NewPropServer()
 	// ps.Start(api)
