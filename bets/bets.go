@@ -111,9 +111,9 @@ func ValidateBet(bet *Bet) error {
 	if bet.BetOnTeam == "" {
 		return fmt.Errorf("Invalid HTTP Request")
 	}
-	if bet.BetCategory == "" {
-		return fmt.Errorf("Invalid HTTP Request")
-	}
+	// if bet.BetCategory == "" {
+	// 	return fmt.Errorf("Invalid HTTP Request")
+	// }
 
 	if bet.BetPoint == 0 {
 		return fmt.Errorf("Invalid HTTP Request")
