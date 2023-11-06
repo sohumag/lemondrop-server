@@ -41,8 +41,8 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 		return s.AddBetToDB(c)
 	})
 
-	betsApi.Get("/bet/user", func(c *fiber.Ctx) error {
-		return s.GetAllBetsByUserId(c)
+	betsApi.Get("/bet/user/:user", func(c *fiber.Ctx) error {
+		return s.GetAllBetsByUserId(c, c.Params("user"))
 	})
 
 	betsApi.Get("/all", func(c *fiber.Ctx) error {

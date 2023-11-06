@@ -35,15 +35,15 @@ type GetBetParams struct {
 	UserId string `json:"user_id"`
 }
 
-func (s *BetServer) GetAllBetsByUserId(c *fiber.Ctx) error {
+func (s *BetServer) GetAllBetsByUserId(c *fiber.Ctx, userId string) error {
 	coll := s.client.Database("bets-db").Collection("bets")
 
-	params := GetBetParams{}
-	if err := c.BodyParser(&params); err != nil {
-		return err
-	}
+	// params := GetBetParams{}
+	// if err := c.BodyParser(&params); err != nil {
+	// 	return err
+	// }
 
-	filter := bson.D{{Key: "userid", Value: params.UserId}}
+	filter := bson.D{{Key: "userid", Value: userId}}
 	cursor, err := coll.Find(context.TODO(), filter)
 
 	if err != nil {
