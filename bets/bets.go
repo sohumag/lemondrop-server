@@ -10,13 +10,14 @@ import (
 )
 
 func (s *BetServer) AddBetToDB(c *fiber.Ctx) error {
-	fmt.Println("received add bet http request")
 	bet := &Bet{}
 	if err := c.BodyParser(&bet); err != nil {
 		fmt.Println(err)
 	}
 
-	if err := ValidateBet(bet); bet != nil {
+	if err := ValidateBet(bet); err != nil {
+		// fmt.Println
+		fmt.Println(err)
 		return err
 	}
 
@@ -115,9 +116,9 @@ func ValidateBet(bet *Bet) error {
 	// 	return fmt.Errorf("Invalid HTTP Request")
 	// }
 
-	if bet.BetPoint == 0 {
-		return fmt.Errorf("Invalid HTTP Request")
-	}
+	// if bet.BetPoint == 0 {
+	// 	return fmt.Errorf("Invalid HTTP Request")
+	// }
 	if bet.BetPrice == 0 {
 		return fmt.Errorf("Invalid HTTP Request")
 	}
