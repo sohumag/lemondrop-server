@@ -10,6 +10,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -55,6 +56,25 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 	gamesApi.Get("/league/:league", func(c *fiber.Ctx) error {
 		return s.GetGamesByLeagueId(c)
 	})
+
+	gamesApi.Get("/game/:id", func(c *fiber.Ctx) error {
+		return s.GetGameById(c)
+	})
+
+	return nil
+}
+
+func (s *GameServer) GetGameById(c *fiber.Ctx) error {
+	coll := s.client.Database("games-db").Collection("scraped-games")
+	id, err := primitive.ObjectIDFromHex(c.Params("id"))
+	if err != nil {
+		return err
+	}
+
+	game := Game{}
+	coll.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&game)
+
+	c.JSON(game)
 
 	return nil
 }
