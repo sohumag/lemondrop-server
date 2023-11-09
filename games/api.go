@@ -10,7 +10,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -45,6 +44,10 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 		return s.GetAllGamesFromDB(c)
 	})
 
+	gamesApi.Get("/leagues", func(c *fiber.Ctx) error {
+		return s.GetAllSports(c)
+	})
+
 	gamesApi.Get("/sport/:sport", func(c *fiber.Ctx) error {
 		return s.GetGamesBySport(c)
 	})
@@ -52,6 +55,26 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 	gamesApi.Get("/league/:league", func(c *fiber.Ctx) error {
 		return s.GetGamesByLeagueId(c)
 	})
+
+	return nil
+}
+
+func (s *GameServer) GetAllSports(c *fiber.Ctx) error {
+	coll := s.client.Database("games-db").Collection("leagues")
+	cursor, err := coll.Find(context.TODO(), bson.M{})
+	if err != nil {
+		fmt.Printf(err.Error())
+		return err
+	}
+
+	leagues := []League{}
+	league := League{}
+	for cursor.Next(context.TODO()) {
+		cursor.Decode(&league)
+		leagues = append(leagues, league)
+	}
+
+	c.JSON(leagues)
 
 	return nil
 }
@@ -133,30 +156,6 @@ func (s *GameServer) DecodeCursorIntoGames(cursor *mongo.Cursor) (*[]Game, error
 		games = append(games, *game)
 	}
 	return &games, nil
-}
-
-type Game struct {
-	Id              primitive.ObjectID `json:"_id" bson:"_id"`
-	GameType        string             `json:"game_type" bson:"game_type"`
-	League          string             `json:"league" bson:"league" `
-	LeagueId        string             `json:"league_id" bson:"league_id"`
-	Sport           string             `json:"sport" bson:"sport"`
-	StartDate       time.Time          `json:"start_date" bson:"start_date"`
-	LastUpdated     time.Time          `json:"last_updated" bson:"last_updated"`
-	Hash            string             `json:"hash" bson:"hash"`
-	AwayTeamName    string             `json:"away_team_name" bson:"away_team_name"`
-	HomeTeamName    string             `json:"home_team_name" bson:"home_team_name"`
-	AwayMoneyline   string             `json:"away_moneyline" bson:"away_moneyline"`
-	HomeMoneyline   string             `json:"home_moneyline" bson:"home_moneyline"`
-	DrawMoneyline   string             `json:"draw_moneyline" bson:"draw_moneyline"`
-	AwaySpreadPoint string             `json:"away_spread_point" bson:"away_spread_point"`
-	AwaySpreadPrice string             `json:"away_spread_price" bson:"away_spread_price"`
-	HomeSpreadPoint string             `json:"home_spread_point" bson:"home_spread_point"`
-	HomeSpreadPrice string             `json:"home_spread_price" bson:"home_spread_price"`
-	UnderPoint      string             `json:"under_point" bson:"under_point"`
-	UnderPrice      string             `json:"under_price" bson:"under_price"`
-	OverPoint       string             `json:"over_point" bson:"over_point"`
-	OverPrice       string             `json:"over_price" bson:"over_price"`
 }
 
 func (s *GameServer) Start(api fiber.Router) error {
