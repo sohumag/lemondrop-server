@@ -100,6 +100,7 @@ func (s *GameServer) GetGamesBySport(c *fiber.Ctx) error {
 
 	return nil
 }
+
 func (s *GameServer) GetGamesByLeagueId(c *fiber.Ctx) error {
 	coll := s.client.Database("games-db").Collection("scraped-games")
 	currentDate := time.Now()
