@@ -46,6 +46,10 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 	})
 
 	gamesApi.Get("/leagues", func(c *fiber.Ctx) error {
+		return s.GetAllLeagues(c)
+	})
+
+	gamesApi.Get("/sports", func(c *fiber.Ctx) error {
 		return s.GetAllSports(c)
 	})
 
@@ -80,6 +84,19 @@ func (s *GameServer) GetGameById(c *fiber.Ctx) error {
 }
 
 func (s *GameServer) GetAllSports(c *fiber.Ctx) error {
+	sports := []Sport{
+		{Name: "Basketball"},
+		{Name: "Football"},
+		{Name: "Ice Hockey"},
+		{Name: "Soccer"},
+	}
+
+	c.JSON(sports)
+
+	return nil
+}
+
+func (s *GameServer) GetAllLeagues(c *fiber.Ctx) error {
 	coll := s.client.Database("games-db").Collection("leagues")
 	cursor, err := coll.Find(context.TODO(), bson.M{})
 	if err != nil {

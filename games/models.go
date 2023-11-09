@@ -37,3 +37,7 @@ type League struct {
 	Sport             string             `json:"sport" bson:"sport"`
 	LeagueDescription string             `json:"league_description" bson:"league_description"`
 }
+
+type Sport struct {
+	Name string `json:"name" bson:"name"`
+}
