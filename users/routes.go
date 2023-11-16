@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -30,17 +31,20 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		PhoneNumber: pieces["phone_number"],
 		Email:       pieces["email"],
 		// encrypt!!!
-		Password: pieces["password"],
-
+		Password:            pieces["password"],
+		UserId:              primitive.NewObjectID(),
 		DateJoined:          time.Now(),
 		CurrentBalance:      0,
 		CurrentAvailability: 0,
 		CurrentFreePlay:     0,
 		CurrentPending:      0,
+		TotalProfit:         0,
 	}
 
+	fmt.Println(user)
+
 	// encrypting password
-	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(pieces["password"]), 15)
+	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(pieces["password"]), 10)
 	user.Password = string(passwordHash)
 
 	// adding user to database

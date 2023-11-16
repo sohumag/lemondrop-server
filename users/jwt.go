@@ -13,20 +13,13 @@ type UserClaim struct {
 	Email string
 }
 
-var secretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
-
 func GenerateJWT(email string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaim{
-		RegisteredClaims: jwt.RegisteredClaims{},
-		Email:            email,
-	})
-
-	jwtToken, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return jwtToken, nil
+	secretKey := []byte(os.Getenv("JWT_SECRET_KEY"))
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := make(jwt.MapClaims)
+	claims["Email"] = email
+	token.Claims = claims
+	return token.SignedString(secretKey)
 }
 
 // returns email, err
@@ -39,6 +32,7 @@ func ValidateJWT(jwtToken string) (string, error) {
 	})
 
 	if err != nil {
+		fmt.Println(err)
 		return "", err
 	}
 
