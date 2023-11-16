@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (s *BetServer) AddBetToDB(c *fiber.Ctx) error {
@@ -14,12 +15,8 @@ func (s *BetServer) AddBetToDB(c *fiber.Ctx) error {
 	if err := c.BodyParser(&bet); err != nil {
 		fmt.Println(err)
 	}
-
-	if err := ValidateBet(bet); err != nil {
-		// fmt.Println
-		fmt.Println(err)
-		return err
-	}
+	bet.BetStatus = "Pending"
+	// fmt.Println(bet)
 
 	coll := s.client.Database("bets-db").Collection("bets")
 	result, err := coll.InsertOne(context.TODO(), &bet)
@@ -39,13 +36,9 @@ type GetBetParams struct {
 func (s *BetServer) GetAllBetsByUserId(c *fiber.Ctx, userId string) error {
 	coll := s.client.Database("bets-db").Collection("bets")
 
-	// params := GetBetParams{}
-	// if err := c.BodyParser(&params); err != nil {
-	// 	return err
-	// }
-
-	filter := bson.D{{Key: "userid", Value: userId}}
-	cursor, err := coll.Find(context.TODO(), filter)
+	filter := bson.D{{Key: "user_id", Value: userId}}
+	opts := options.Find().SetSort(bson.D{{Key: "bet_placed_time", Value: -1}})
+	cursor, err := coll.Find(context.TODO(), filter, opts)
 
 	if err != nil {
 		return err
@@ -119,10 +112,10 @@ func ValidateBet(bet *Bet) error {
 	// if bet.BetPoint == 0 {
 	// 	return fmt.Errorf("Invalid HTTP Request")
 	// }
-	if bet.BetPrice == 0 {
+	if bet.BetPrice == "" {
 		return fmt.Errorf("Invalid HTTP Request")
 	}
-	if bet.BetAmount == 0 {
+	if bet.BetAmount == "" {
 		return fmt.Errorf("Invalid HTTP Request")
 	}
 

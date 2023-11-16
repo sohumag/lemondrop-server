@@ -1,0 +1,25 @@
+- User adds $100 into account (Balance: 100, Pending: 0, Earned: 0)
+
+- User places bet for $50 at -200.  (Balance: 50, Pending: 50, Earned: 0)
+- Bet hits. (Balance: 125, Pending: 0, Earned: 25)
+
+- User places another bet for $100 at +300 (Balance: 25, Pending: 100, Earned: 25)
+- Bet fails. (Balance: 25, Pending: 0, Earned: 25)
+
+- User places bet for $25 (Balance: 0, Pending: 25, Earned: 25)
+- Bet fails. (Balance: 0, Pending: 0, Earned: 25)
+
+- User cannot place anymore bets until they add money
+
+--> user adds more money
+
+...
+
+- User wants to withdraw money(Balance: 125, Pending: 0, Earned: 200)
+- User gets 0.97*balance for pulling money -> (Balance: 0, Pending: 0, Earned: 200)
+
+--------------------------------
+
+Need endpoints for 
+1. Adding money into account
+2. Sending money back to clients

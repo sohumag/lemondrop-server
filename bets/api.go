@@ -53,34 +53,40 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 }
 
 func (s *BetServer) Start(api fiber.Router) error {
+	s.RunBetCheckingRepeater()
 	s.StartBetServerAPI(api)
 	return nil
 }
 
 type Bet struct {
 	// user information
-	UserId           string  `json:"user_id"`
-	UserEmail        string  `json:"user_email"`
-	UserBalance      float64 `json:"user_balance"`
-	UserAvailability float64 `json:"user_availability"`
-	UserPending      float64 `json:"user_pending"`
-	UserFreePlay     float64 `json:"user_free_play"`
+	UserId      string  `json:"user_id" bson:"user_id"`
+	UserEmail   string  `json:"user_email" bson:"user_email"`
+	UserBalance float64 `json:"user_balance" bson:"user_balance"`
+	// UserAvailability float64 `json:"user_availability" bson:"user_availability"`
+	UserPending  float64 `json:"user_pending" bson:"user_pending"`
+	UserFreePlay float64 `json:"user_free_play" bson:"user_free_play"`
+	TotalProfit  float64 `json:"total_profit" bson:"total_profit"`
 
 	// game information
-	GameId        string    `json:"game_id"`
-	HomeTeam      string    `json:"home_team"`
-	AwayTeam      string    `json:"away_team"`
-	GameStartTime time.Time `json:"game_start_time"`
+	GameId        string    `json:"game_id" bson:"game_id"`
+	GameHash      string    `json:"game_hash" bson:"game_hash"`
+	HomeTeam      string    `json:"home_team_name" bson:"home_team_name"`
+	AwayTeam      string    `json:"away_team_name" bson:"away_team_name"`
+	GameStartTime time.Time `json:"game_start_time" bson:"game_start_time"`
+	GameErr       bool      `json:"game_err" bson:"game_err"`
 
 	// bet information
-	BetId       string  `json:"bet_id"`
-	BetType     string  `json:"bet_type"`
-	BetOnTeam   string  `json:"bet_on_team"`
-	BetCategory string  `json:"bet_category"` // for player props etc: really bet description
-	BetPoint    float64 `json:"bet_point"`
-	BetPrice    float64 `json:"bet_price"`
-	BetAmount   float64 `json:"bet_amount"`
-	BetVerified bool    `json:"bet_verified"`
-	BetCashed   bool    `json:"bet_cashed"`
-	BetStatus   string  `json:"bet_status"`
+	BetId       string `json:"bet_id" bson:"bet_id"`
+	BetType     string `json:"bet_type" bson:"bet_type"`
+	BetOnTeam   string `json:"bet_on_team" bson:"bet_on_team"`
+	BetCategory string `json:"bet_category" bson:"bet_category"` // for player props etc: really bet description
+	BetPoint    string `json:"bet_point" bson:"bet_point"`
+	BetPrice    string `json:"bet_price" bson:"bet_price"`
+	BetAmount   string `json:"bet_amount" bson:"bet_amount"`
+	BetVerified bool   `json:"bet_verified" bson:"bet_verified"`
+	BetCashed   bool   `json:"bet_cashed" bson:"bet_cashed"`
+	BetStatus   string `json:"bet_status" bson:"bet_status"`
+
+	BetPlacedTime time.Time `json:"bet_placed_time" bson:"bet_placed_time"`
 }

@@ -9,11 +9,9 @@ import (
 	"github.com/rlvgl/bookie-server/bets"
 	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/markets"
-	"github.com/rlvgl/bookie-server/news"
 
 	// "github.com/rlvgl/bookie-server/scores"
 	"github.com/rlvgl/bookie-server/users"
-	"github.com/rlvgl/bookie-server/wheels"
 )
 
 func StartAPI(port int) error {
@@ -46,16 +44,16 @@ func StartAPI(port int) error {
 	// }()
 
 	// NEWS SERVER ------------------------
-	ns := news.NewNewsServer()
-	ns.Start(api)
+	// ns := news.NewNewsServer()
+	// ns.Start(api)
 
 	// USER SERVER ------------------------
 	us := users.NewUserServer()
 	us.Start(api)
 
 	// WHEELS SERVER ----------------------
-	ws := wheels.NewWheelServer()
-	ws.Start(api)
+	// ws := wheels.NewWheelServer()
+	// ws.Start(api)
 
 	bs := bets.NewBetServer()
 	bs.Start(api)
