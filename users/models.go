@@ -9,12 +9,12 @@ import (
 
 type User struct {
 	// User Added
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	JWT         string `json:"jwt"`
+	FirstName   string `json:"first_name" bson:"first_name"`
+	LastName    string `json:"last_name" bson:"last_name"`
+	PhoneNumber string `json:"phone_number" bson:"phone_number"`
+	Email       string `json:"email" bson:"email"`
+	Password    string `json:"password" bson:"password"`
+	JWT         string `json:"jwt" bson:"jwt"`
 
 	// Collected
 	UserId              primitive.ObjectID `json:"user_id" bson:"_id"`
