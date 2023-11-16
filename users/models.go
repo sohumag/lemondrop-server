@@ -18,11 +18,12 @@ type User struct {
 
 	// Collected
 	UserId              primitive.ObjectID `json:"user_id" bson:"_id"`
-	DateJoined          time.Time          `json:"date_joined"`
-	CurrentBalance      float64            `json:"current_balance"`
-	CurrentAvailability float64            `json:"current_availability"`
-	CurrentFreePlay     float64            `json:"current_free_play"`
-	CurrentPending      float64            `json:"current_pending"`
+	DateJoined          time.Time          `json:"date_joined" bson:"date_joined"`
+	CurrentBalance      float64            `json:"current_balance" bson:"current_balance"`
+	CurrentAvailability float64            `json:"current_availability" bson:"current_availability"`
+	CurrentFreePlay     float64            `json:"current_free_play" bson:"current_free_play"`
+	CurrentPending      float64            `json:"current_pending" bson:"current_pending"`
+	TotalProfit         float64            `json:"total_profit" bson:"total_profit"`
 }
 
 type UserServer struct {
