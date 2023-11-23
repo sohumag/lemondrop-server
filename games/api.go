@@ -65,6 +65,65 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 		return s.GetGameById(c)
 	})
 
+	picksApi := api.Group("/picks")
+	picksApi.Get("/", func(c *fiber.Ctx) error {
+		c.Send([]byte("picks api is working"))
+		return nil
+	})
+
+	picksApi.Get("/:league", func(c *fiber.Ctx) error {
+		return s.GetPicksByLeagueId(c)
+	})
+
+	picksApi.Get("/:league/markets", func(c *fiber.Ctx) error {
+		return s.GetMarketsByLeagueId(c)
+	})
+
+	return nil
+}
+
+func (s *GameServer) GetPicksByLeagueId(c *fiber.Ctx) error {
+	coll := s.client.Database("games-db").Collection("scraped-picks")
+	// filter := bson.D{{Key: "league_id", Value: strings.ToLower(c.Params("league"))}}
+	currentDate := time.Now()
+	maxDate := currentDate.Add(time.Hour * 24 * 7)
+	filter := bson.M{"start_date": bson.M{"$gt": currentDate, "$lt": maxDate}, "league_id": strings.ToLower(c.Params("league"))}
+	opts := options.Find().SetSort(bson.D{{Key: "market", Value: -1}})
+	cursor, err := coll.Find(context.TODO(), filter, opts)
+	if err != nil {
+		return err
+	}
+
+	picks := []Pick{}
+	pick := Pick{}
+	for cursor.Next(context.TODO()) {
+		cursor.Decode(&pick)
+		picks = append(picks, pick)
+	}
+
+	allPicks := map[string][]Pick{}
+	for _, p := range picks {
+		if _, ok := allPicks[p.Market]; !ok {
+			allPicks[p.Market] = []Pick{}
+		}
+		allPicks[p.Market] = append(allPicks[p.Market], p)
+	}
+
+	c.JSON(allPicks)
+
+	return nil
+}
+
+func (s *GameServer) GetMarketsByLeagueId(c *fiber.Ctx) error {
+	coll := s.client.Database("games-db").Collection("scraped-picks")
+	filter := bson.D{{Key: "league_id", Value: strings.ToLower(c.Params("league"))}}
+	results, err := coll.Distinct(context.TODO(), "market", filter)
+	if err != nil {
+		return err
+	}
+
+	c.JSON(results)
+
 	return nil
 }
 

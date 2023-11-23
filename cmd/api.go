@@ -9,6 +9,7 @@ import (
 	"github.com/rlvgl/bookie-server/bets"
 	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/markets"
+	"github.com/rlvgl/bookie-server/verification"
 
 	// "github.com/rlvgl/bookie-server/scores"
 	"github.com/rlvgl/bookie-server/users"
@@ -63,6 +64,9 @@ func StartAPI(port int) error {
 
 	as := assetLookup.NewAssetServer()
 	as.Start(api)
+
+	vs := verification.NewVerificationServer()
+	vs.Start(api)
 
 	// ss := scores.NewScoreServer()
 	// ss.Start(api)

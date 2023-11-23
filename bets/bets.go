@@ -52,7 +52,6 @@ func (s *BetServer) GetAllBetsByUserId(c *fiber.Ctx, userId string) error {
 	}
 
 	c.JSON(allBets)
-
 	return nil
 }
 

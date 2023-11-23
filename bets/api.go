@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/lib/pq"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -53,7 +54,7 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 }
 
 func (s *BetServer) Start(api fiber.Router) error {
-	s.RunBetCheckingRepeater()
+	// s.RunBetCheckingRepeater()
 	s.StartBetServerAPI(api)
 	return nil
 }
@@ -77,16 +78,16 @@ type Bet struct {
 	GameErr       bool      `json:"game_err" bson:"game_err"`
 
 	// bet information
-	BetId       string `json:"bet_id" bson:"bet_id"`
-	BetType     string `json:"bet_type" bson:"bet_type"`
-	BetOnTeam   string `json:"bet_on_team" bson:"bet_on_team"`
-	BetCategory string `json:"bet_category" bson:"bet_category"` // for player props etc: really bet description
-	BetPoint    string `json:"bet_point" bson:"bet_point"`
-	BetPrice    string `json:"bet_price" bson:"bet_price"`
-	BetAmount   string `json:"bet_amount" bson:"bet_amount"`
-	BetVerified bool   `json:"bet_verified" bson:"bet_verified"`
-	BetCashed   bool   `json:"bet_cashed" bson:"bet_cashed"`
-	BetStatus   string `json:"bet_status" bson:"bet_status"`
+	BetId       primitive.ObjectID `json:"bet_id" bson:"_id"`
+	BetType     string             `json:"bet_type" bson:"bet_type"`
+	BetOnTeam   string             `json:"bet_on_team" bson:"bet_on_team"`
+	BetCategory string             `json:"bet_category" bson:"bet_category"` // for player props etc: really bet description
+	BetPoint    string             `json:"bet_point" bson:"bet_point"`
+	BetPrice    string             `json:"bet_price" bson:"bet_price"`
+	BetAmount   string             `json:"bet_amount" bson:"bet_amount"`
+	BetVerified bool               `json:"bet_verified" bson:"bet_verified"`
+	BetCashed   bool               `json:"bet_cashed" bson:"bet_cashed"`
+	BetStatus   string             `json:"bet_status" bson:"bet_status"` // Pending, Won, Lost, Pushed
 
 	BetPlacedTime time.Time `json:"bet_placed_time" bson:"bet_placed_time"`
 }

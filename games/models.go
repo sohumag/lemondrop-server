@@ -30,6 +30,21 @@ type Game struct {
 	OverPrice       string             `json:"over_price" bson:"over_price"`
 }
 
+type Pick struct {
+	Id               primitive.ObjectID `json:"id" bson:"_id"`
+	PlayerName       string             `json:"player_name" bson:"player_name"`
+	Point            string             `json:"point" bson:"point"`
+	PlayerPictureUrl string             `json:"player_picture_url" bson:"player_picture_url"`
+	TeamPosition     string             `json:"team_position" bson:"team_position"`
+	StartDate        time.Time          `json:"start_date" bson:"start_date"`
+	Sport            string             `json:"sport" bson:"sport"`
+	LeagueName       string             `json:"league_name" bson:"league_name"`
+	LeagueId         string             `json:"league_id" bson:"league_id"`
+	Opponent         string             `json:"opponent" bson:"opponent"`
+	Market           string             `json:"market" bson:"market"`
+	Hash             string             `json:"hash" bson:"hash"`
+}
+
 type League struct {
 	Id                primitive.ObjectID `json:"id" bson:"_id"`
 	LeagueName        string             `json:"league_name" bson:"league_name"`
