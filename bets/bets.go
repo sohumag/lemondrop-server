@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -16,6 +17,7 @@ func (s *BetServer) AddBetToDB(c *fiber.Ctx) error {
 		fmt.Println(err)
 	}
 	bet.BetStatus = "Pending"
+	bet.BetId = primitive.NewObjectID()
 	// fmt.Println(bet)
 
 	coll := s.client.Database("bets-db").Collection("bets")

@@ -54,7 +54,7 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 }
 
 func (s *BetServer) Start(api fiber.Router) error {
-	// s.RunBetCheckingRepeater()
+	s.RunBetCheckingRepeater()
 	s.StartBetServerAPI(api)
 	return nil
 }
@@ -72,8 +72,8 @@ type Bet struct {
 	// game information
 	GameId        string    `json:"game_id" bson:"game_id"`
 	GameHash      string    `json:"game_hash" bson:"game_hash"`
-	HomeTeam      string    `json:"home_team_name" bson:"home_team_name"`
-	AwayTeam      string    `json:"away_team_name" bson:"away_team_name"`
+	HomeTeam      string    `json:"home_team" bson:"home_team"`
+	AwayTeam      string    `json:"away_team" bson:"away_team"`
 	GameStartTime time.Time `json:"game_start_time" bson:"game_start_time"`
 	GameErr       bool      `json:"game_err" bson:"game_err"`
 
