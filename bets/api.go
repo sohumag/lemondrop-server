@@ -78,16 +78,19 @@ type Bet struct {
 	GameErr       bool      `json:"game_err" bson:"game_err"`
 
 	// bet information
-	BetId       primitive.ObjectID `json:"bet_id" bson:"_id"`
-	BetType     string             `json:"bet_type" bson:"bet_type"`
-	BetOnTeam   string             `json:"bet_on_team" bson:"bet_on_team"`
-	BetCategory string             `json:"bet_category" bson:"bet_category"` // for player props etc: really bet description
-	BetPoint    string             `json:"bet_point" bson:"bet_point"`
-	BetPrice    string             `json:"bet_price" bson:"bet_price"`
-	BetAmount   string             `json:"bet_amount" bson:"bet_amount"`
-	BetVerified bool               `json:"bet_verified" bson:"bet_verified"`
-	BetCashed   bool               `json:"bet_cashed" bson:"bet_cashed"`
-	BetStatus   string             `json:"bet_status" bson:"bet_status"` // Pending, Won, Lost, Pushed
+	BetId          primitive.ObjectID `json:"bet_id" bson:"_id"`
+	BetType        string             `json:"bet_type" bson:"bet_type"`
+	BetOnTeam      string             `json:"bet_on_team" bson:"bet_on_team"`
+	BetCategory    string             `json:"bet_category" bson:"bet_category"` // for player props etc: really bet description
+	BetPoint       string             `json:"bet_point" bson:"bet_point"`
+	BetPrice       string             `json:"bet_price" bson:"bet_price"`
+	BetAmount      string             `json:"bet_amount" bson:"bet_amount"`
+	BetVerified    bool               `json:"bet_verified" bson:"bet_verified"`
+	BetCashed      bool               `json:"bet_cashed" bson:"bet_cashed"`
+	BetStatus      string             `json:"bet_status" bson:"bet_status"` // Pending, Won, Lost, Pushed
+	IsParlay       bool               `json:"is_parlay" bson:"is_parlay"`
+	ParlayFinished bool               `json:"parlay_finished" bson:"parlay_finished"`
+	Bets           []Bet              `json:"bets" bson:"bets"`
 
 	BetPlacedTime time.Time `json:"bet_placed_time" bson:"bet_placed_time"`
 }

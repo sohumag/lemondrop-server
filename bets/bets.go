@@ -16,9 +16,15 @@ func (s *BetServer) AddBetToDB(c *fiber.Ctx) error {
 	if err := c.BodyParser(&bet); err != nil {
 		fmt.Println(err)
 	}
+
 	bet.BetStatus = "Pending"
 	bet.BetId = primitive.NewObjectID()
-	// fmt.Println(bet)
+
+	if bet.IsParlay {
+		for i := 0; i < len(bet.Bets); i++ {
+			bet.Bets[i].BetStatus = "Pending"
+		}
+	}
 
 	coll := s.client.Database("bets-db").Collection("bets")
 	result, err := coll.InsertOne(context.TODO(), &bet)

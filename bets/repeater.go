@@ -42,18 +42,64 @@ func (s *BetServer) RunBetCheckingRepeater() {
 		allBets = append(allBets, *placeholder)
 	}
 
-	// fmt.Println(allBets)
 	for _, bet := range allBets {
-		s.CheckBet(&bet)
+		if bet.IsParlay {
+			s.CheckParlay(&bet)
+		} else { // singles
+			s.CheckBet(&bet)
+		}
+
 		filter := bson.D{{Key: "_id", Value: bet.BetId}}
-		update := bson.D{{Key: "$set", Value: bson.D{{Key: "bet_status", Value: bet.BetStatus}}}}
-		// fmt.Println(bet.BetStatus, bet.GameHash)
+		update := bson.D{{Key: "$set", Value: bson.D{{Key: "bet_status", Value: bet.BetStatus}, {Key: "parlay_finished", Value: bet.ParlayFinished}}}}
 		_, err := coll.UpdateOne(context.TODO(), filter, update)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		// fmt.Println(res.)
+	}
+}
+
+func (s *BetServer) CheckParlay(parlay *Bet) {
+	// check if parlay is finisehd. not necessary but extrea check is nice
+	s.UpdateParlayStatus(parlay)
+	if parlay.ParlayFinished {
+		return
+	}
+
+	// parlay is not completed:
+	// for each bet in parlay
+	// check status of game. if doesnt exist: next game
+	// update status of parlay at end
+	// update database w parlay: done at top level caller**
+
+	for _, bet := range parlay.Bets {
+		s.CheckBet(&bet)
+	}
+
+	s.UpdateParlayStatus(parlay)
+
+	return
+}
+
+func (s *BetServer) UpdateParlayStatus(parlay *Bet) {
+	inProgress := false
+	lost := false
+	for _, bet := range parlay.Bets {
+		if bet.BetStatus == "Pending" {
+			inProgress = true
+			break
+		} else if bet.BetStatus == "Lost" {
+			lost = true
+		}
+	}
+	if inProgress {
+		return
+	} else if lost {
+		parlay.ParlayFinished = true
+		parlay.BetStatus = "Lost"
+	} else {
+		parlay.ParlayFinished = true
+		parlay.BetStatus = "Won"
 	}
 }
 
@@ -73,7 +119,6 @@ type GameScore struct {
 func (s *BetServer) CheckBet(bet *Bet) {
 	// check scores db for where dk hash matches hash
 	coll := s.client.Database("games-db").Collection("scraped-scores")
-
 	gameScore := GameScore{}
 	filter := bson.D{{Key: "dk_hash", Value: bet.GameHash}}
 	err := coll.FindOne(context.TODO(), filter).Decode(&gameScore)
@@ -84,20 +129,10 @@ func (s *BetServer) CheckBet(bet *Bet) {
 		}
 		log.Fatal(err)
 	}
-	// fmt.Println("checking bet:", bet.BetOnTeam, bet.GameHash)
-	// fmt.Println(gameScore)
 
-	// fmt.Printf("game score: %v\n", gameScore)
+	// parse game and update bet type
 	awayScore, err := strconv.Atoi(gameScore.AwayFinalScore)
 	homeScore, err := strconv.Atoi(gameScore.HomeFinalScore)
-	// fmt.Printf("%v(%v) @ %v(%v)\n", bet.AwayTeam, awayScore, bet.HomeTeam, homeScore)
-
-	// switch on bet type
-	// fmt.Println(bet.BetOnTeam, bet.BetType, bet.AwayTeam)
-	// fmt.Println("team names: ", bet.BetOnTeam, gameScore.AwayTeamName)
-
-	// fmt.Println(bet.BetType)
-
 	switch strings.ToLower(bet.BetType) {
 	case "moneyline":
 		// fmt.Println("validating ml")
@@ -120,20 +155,25 @@ func (s *BetServer) CheckBet(bet *Bet) {
 			}
 		}
 	case "spread":
+		// fmt.Println(bet.AwayTeam, bet.HomeTeam, bet.BetOnTeam)
+		numPoint := 0.0
+		if bet.BetPoint[0] == '-' {
+			numPoint, err = strconv.ParseFloat(bet.BetPoint[1:], 64)
+			numPoint = numPoint * -1
+		} else if bet.BetPoint[0] == '+' {
+			numPoint, err = strconv.ParseFloat(bet.BetPoint[1:], 64)
+		}
+		homeScore, _ := strconv.ParseFloat(gameScore.HomeFinalScore, 64)
+		awayScore, _ := strconv.ParseFloat(gameScore.AwayFinalScore, 64)
+
 		if strings.Contains(bet.BetOnTeam, bet.AwayTeam) {
-			// parse away spread
+			if awayScore+numPoint > awayScore {
+				s.MarkBetAsValid(bet)
+			} else if awayScore+numPoint < awayScore {
+				s.MarkBetAsInvalid(bet)
+			}
 
 		} else if strings.Contains(bet.BetOnTeam, bet.HomeTeam) {
-			numPoint := 0.0
-			if bet.BetPoint[0] == '-' {
-				numPoint, err = strconv.ParseFloat(bet.BetPoint[1:], 64)
-				numPoint = numPoint * -1
-			} else if bet.BetPoint[0] == '+' {
-				numPoint, err = strconv.ParseFloat(bet.BetPoint[1:], 64)
-			}
-			homeScore, _ := strconv.ParseFloat(gameScore.HomeFinalScore, 64)
-			awayScore, _ := strconv.ParseFloat(gameScore.AwayFinalScore, 64)
-
 			if homeScore+numPoint > awayScore {
 				s.MarkBetAsValid(bet)
 			} else if homeScore+numPoint < awayScore {
@@ -141,18 +181,40 @@ func (s *BetServer) CheckBet(bet *Bet) {
 			}
 		}
 
-	}
+	case "over", "under":
+		point, _ := strconv.ParseFloat(bet.BetPoint, 64)
+		homeScore, _ := strconv.ParseFloat(gameScore.HomeFinalScore, 64)
+		awayScore, _ := strconv.ParseFloat(gameScore.AwayFinalScore, 64)
+		teamTotal := homeScore + awayScore
+		if strings.ToLower(bet.BetType) == "over" {
+			if teamTotal > point {
+				s.MarkBetAsValid(bet)
+			} else if teamTotal < point {
+				s.MarkBetAsInvalid(bet)
+			} else if teamTotal == point {
+				s.MarkBetAsPush(bet)
+			}
+		} else if strings.ToLower(bet.BetType) == "under" {
+			if teamTotal < point {
+				s.MarkBetAsValid(bet)
+			} else if teamTotal > point {
+				s.MarkBetAsInvalid(bet)
+			} else if teamTotal == point {
+				s.MarkBetAsPush(bet)
+			}
+		}
 
+	}
 }
 
 func (s *BetServer) MarkBetAsValid(bet *Bet) {
 	bet.BetStatus = "Won"
-	fmt.Println("bet is valid")
+	fmt.Println("bet is valid. Marking as Won.")
 }
 
 func (s *BetServer) MarkBetAsInvalid(bet *Bet) {
 	bet.BetStatus = "Lost"
-	fmt.Println("bet is invalid")
+	fmt.Println("bet is invalid. Marking as Lost.")
 }
 
 func (s *BetServer) MarkBetAsPush(bet *Bet) {
