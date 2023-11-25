@@ -9,6 +9,7 @@ import (
 	"github.com/rlvgl/bookie-server/bets"
 	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/markets"
+	"github.com/rlvgl/bookie-server/payments"
 	"github.com/rlvgl/bookie-server/verification"
 
 	// "github.com/rlvgl/bookie-server/scores"
@@ -33,28 +34,12 @@ func StartAPI(port int) error {
 	gs := games.NewGameServer()
 	gs.Start(api)
 
-	// ARCHIVED GAME SERVER ------------------------
-	// gs := games.NewGameServer()
-	// gs.Start(api)
-
-	// go func() {
-	// 	s := gocron.NewScheduler(time.UTC)
-	// 	s.Every(4).Hours().Do(func() {
-	// 		gs.MigrateAllGames()
-	// 	})
-	// }()
-
-	// NEWS SERVER ------------------------
-	// ns := news.NewNewsServer()
-	// ns.Start(api)
-
 	// USER SERVER ------------------------
 	us := users.NewUserServer()
 	us.Start(api)
 
-	// WHEELS SERVER ----------------------
-	// ws := wheels.NewWheelServer()
-	// ws.Start(api)
+	ps := payments.NewPaymentServer()
+	ps.Start(api)
 
 	bs := bets.NewBetServer()
 	bs.Start(api)
@@ -67,14 +52,6 @@ func StartAPI(port int) error {
 
 	vs := verification.NewVerificationServer()
 	vs.Start(api)
-
-	// ss := scores.NewScoreServer()
-	// ss.Start(api)
-
-	// ps := props.NewPropServer()
-	// ps.Start(api)
-	// ps.GetAllPropsGames()
-	// ps.ScrapeAllBovadaSports()
 
 	// log.Printf("Starting API on port %d\n", port)
 	app.Listen(fmt.Sprintf(":%d", port))

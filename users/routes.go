@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/customer"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -25,12 +27,21 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		}
 	}
 
+	stripe.Key = "sk_test_WQ4y1OC1xfTS8CCcu8nTKf29"
+
+	params := &stripe.CustomerParams{
+		Email: stripe.String(pieces["email"]),
+		Name:  stripe.String(pieces["first_name"] + pieces["last_name"]),
+		Phone: stripe.String(pieces["phone_number"]),
+	}
+	cust, _ := customer.New(params)
+	fmt.Println(cust.ID)
+
 	user := User{
-		FirstName:   pieces["first_name"],
-		LastName:    pieces["last_name"],
-		PhoneNumber: pieces["phone_number"],
-		Email:       pieces["email"],
-		// encrypt!!!
+		FirstName:           pieces["first_name"],
+		LastName:            pieces["last_name"],
+		PhoneNumber:         pieces["phone_number"],
+		Email:               pieces["email"],
 		Password:            pieces["password"],
 		UserId:              primitive.NewObjectID(),
 		DateJoined:          time.Now(),
@@ -39,6 +50,7 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		CurrentFreePlay:     0,
 		CurrentPending:      0,
 		TotalProfit:         0,
+		StripeCustomerId:    cust.ID,
 	}
 
 	fmt.Println(user)

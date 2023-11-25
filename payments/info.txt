@@ -24,3 +24,9 @@ Need endpoints for
 1. Adding money into account
 2. Sending money back to clients
 3. some kind of integration for updating user finances
+
+
+
+
+TODO!!!
+- create frontend page to redirect to

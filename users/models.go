@@ -24,6 +24,7 @@ type User struct {
 	CurrentFreePlay     float64            `json:"current_free_play" bson:"current_free_play"`
 	CurrentPending      float64            `json:"current_pending" bson:"current_pending"`
 	TotalProfit         float64            `json:"total_profit" bson:"total_profit"`
+	StripeCustomerId    string             `json:"stripe_customer_id" bson:"stripe_customer_id"`
 }
 
 type UserServer struct {
