@@ -4,21 +4,28 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rlvgl/bookie-server/users"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (s *BetServer) AddBetToDB(c *fiber.Ctx) error {
+/*
+	on bet placed: check if balance will allow -> move to pending.
+	on bet finished: move from pending to either profit or delete.
+*/
+
+func (s *BetServer) HandleBetRequest(c *fiber.Ctx) error {
 	bet := &Bet{}
 	if err := c.BodyParser(&bet); err != nil {
 		fmt.Println(err)
 	}
 
-	bet.BetStatus = "Pending"
-	bet.BetId = primitive.NewObjectID()
+	// bet.BetStatus = "Pending"
+	// bet.BetId = primitive.NewObjectID()
 
 	if bet.IsParlay {
 		for i := 0; i < len(bet.Bets); i++ {
@@ -26,15 +33,67 @@ func (s *BetServer) AddBetToDB(c *fiber.Ctx) error {
 		}
 	}
 
+	// check if user has balance available
+	// if is parlay. check once.
+	// if singles. add all amounts in bets body and check
+	betAmt := 0.0
+	if bet.IsParlay {
+		betAmt, _ = strconv.ParseFloat(bet.BetAmount, 64)
+	} else {
+		for _, subBet := range bet.Bets {
+			// fmt.Println(subBet.BetOnTeam)
+			subBetAmt, _ := strconv.ParseFloat(subBet.BetAmount, 64)
+			betAmt += subBetAmt
+		}
+	}
+
+	userColl := s.client.Database("users-db").Collection("users")
+	user := users.User{}
+	id, _ := primitive.ObjectIDFromHex(bet.UserId)
+	filter := bson.M{"_id": id}
+	userColl.FindOne(context.TODO(), filter).Decode(&user)
+
+	// will fail all if not enough in balance
+	if betAmt > user.CurrentBalance {
+		return fmt.Errorf("broke boy")
+	}
+
+	update := bson.M{"$set": bson.M{"current_balance": user.CurrentBalance - betAmt, "current_pending": user.CurrentPending + betAmt}}
+	_, err := userColl.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if bet.IsParlay {
+		s.AddBetToDB(*bet, c)
+	} else {
+		for _, sb := range bet.Bets {
+			s.AddBetToDB(sb, c)
+		}
+	}
+
+	// s.AddBetToDB(*bet, c)
+
+	return nil
+
+}
+
+func (s *BetServer) AddBetToDB(bet Bet, c *fiber.Ctx) error {
+	// if parlay: add directly
+	// else add for each bet within
 	coll := s.client.Database("bets-db").Collection("bets")
-	result, err := coll.InsertOne(context.TODO(), &bet)
+
+	bet.BetStatus = "Pending"
+	bet.BetId = primitive.NewObjectID()
+	result, err := coll.InsertOne(context.TODO(), bet)
 	if err != nil {
 		c.SendStatus(http.StatusInternalServerError)
 		fmt.Println(err)
 	}
-
 	fmt.Printf("Bet placed with id: %v\n", result.InsertedID)
+
 	return nil
+
 }
 
 type GetBetParams struct {

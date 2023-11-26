@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	_ "github.com/lib/pq"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"go.mongodb.org/mongo-driver/mongo"

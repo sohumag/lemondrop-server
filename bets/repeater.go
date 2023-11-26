@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rlvgl/bookie-server/users"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -46,7 +48,7 @@ func (s *BetServer) RunBetCheckingRepeater() {
 		if bet.IsParlay {
 			s.CheckParlay(&bet)
 		} else { // singles
-			s.CheckBet(&bet)
+			s.CheckBet(&bet, false)
 		}
 
 		filter := bson.D{{Key: "_id", Value: bet.BetId}}
@@ -73,7 +75,7 @@ func (s *BetServer) CheckParlay(parlay *Bet) {
 	// update database w parlay: done at top level caller**
 
 	for _, bet := range parlay.Bets {
-		s.CheckBet(&bet)
+		s.CheckBet(&bet, true)
 	}
 
 	s.UpdateParlayStatus(parlay)
@@ -97,9 +99,11 @@ func (s *BetServer) UpdateParlayStatus(parlay *Bet) {
 	} else if lost {
 		parlay.ParlayFinished = true
 		parlay.BetStatus = "Lost"
+		s.ChangeUserFundsWin(parlay.UserId, parlay.BetAmount)
 	} else {
 		parlay.ParlayFinished = true
 		parlay.BetStatus = "Won"
+		s.ChangeUserFundsLose(parlay.UserId, parlay.BetAmount)
 	}
 }
 
@@ -116,7 +120,7 @@ type GameScore struct {
 	League         string    `json:"league" bson:"league"`
 }
 
-func (s *BetServer) CheckBet(bet *Bet) {
+func (s *BetServer) CheckBet(bet *Bet, partOfParlay bool) {
 	// check scores db for where dk hash matches hash
 	coll := s.client.Database("games-db").Collection("scraped-scores")
 	gameScore := GameScore{}
@@ -140,18 +144,18 @@ func (s *BetServer) CheckBet(bet *Bet) {
 		if bet.BetOnTeam == bet.AwayTeam {
 			if awayScore > homeScore {
 				fmt.Println("away team wins")
-				s.MarkBetAsValid(bet)
+				s.MarkBetAsValid(bet, partOfParlay)
 			} else if awayScore < homeScore {
 				fmt.Println("home team wins")
-				s.MarkBetAsInvalid(bet)
+				s.MarkBetAsInvalid(bet, partOfParlay)
 			}
 		} else if bet.BetOnTeam == bet.HomeTeam {
 			if homeScore > awayScore {
 				fmt.Println("home team wins")
-				s.MarkBetAsValid(bet)
+				s.MarkBetAsValid(bet, partOfParlay)
 			} else if homeScore < awayScore {
 				fmt.Println("away team wins")
-				s.MarkBetAsInvalid(bet)
+				s.MarkBetAsInvalid(bet, partOfParlay)
 			}
 		}
 	case "spread":
@@ -168,16 +172,16 @@ func (s *BetServer) CheckBet(bet *Bet) {
 
 		if strings.Contains(bet.BetOnTeam, bet.AwayTeam) {
 			if awayScore+numPoint > awayScore {
-				s.MarkBetAsValid(bet)
+				s.MarkBetAsValid(bet, partOfParlay)
 			} else if awayScore+numPoint < awayScore {
-				s.MarkBetAsInvalid(bet)
+				s.MarkBetAsInvalid(bet, partOfParlay)
 			}
 
 		} else if strings.Contains(bet.BetOnTeam, bet.HomeTeam) {
 			if homeScore+numPoint > awayScore {
-				s.MarkBetAsValid(bet)
+				s.MarkBetAsValid(bet, partOfParlay)
 			} else if homeScore+numPoint < awayScore {
-				s.MarkBetAsInvalid(bet)
+				s.MarkBetAsInvalid(bet, partOfParlay)
 			}
 		}
 
@@ -188,36 +192,69 @@ func (s *BetServer) CheckBet(bet *Bet) {
 		teamTotal := homeScore + awayScore
 		if strings.ToLower(bet.BetType) == "over" {
 			if teamTotal > point {
-				s.MarkBetAsValid(bet)
+				s.MarkBetAsValid(bet, partOfParlay)
 			} else if teamTotal < point {
-				s.MarkBetAsInvalid(bet)
+				s.MarkBetAsInvalid(bet, partOfParlay)
 			} else if teamTotal == point {
-				s.MarkBetAsPush(bet)
+				s.MarkBetAsPush(bet, partOfParlay)
 			}
 		} else if strings.ToLower(bet.BetType) == "under" {
 			if teamTotal < point {
-				s.MarkBetAsValid(bet)
+				s.MarkBetAsValid(bet, partOfParlay)
 			} else if teamTotal > point {
-				s.MarkBetAsInvalid(bet)
+				s.MarkBetAsInvalid(bet, partOfParlay)
 			} else if teamTotal == point {
-				s.MarkBetAsPush(bet)
+				s.MarkBetAsPush(bet, partOfParlay)
 			}
 		}
 
 	}
 }
 
-func (s *BetServer) MarkBetAsValid(bet *Bet) {
+func (s *BetServer) MarkBetAsValid(bet *Bet, partOfParlay bool) {
 	bet.BetStatus = "Won"
 	fmt.Println("bet is valid. Marking as Won.")
+	if !partOfParlay {
+		s.ChangeUserFundsWin(bet.UserId, bet.BetAmount)
+	}
 }
 
-func (s *BetServer) MarkBetAsInvalid(bet *Bet) {
+func (s *BetServer) MarkBetAsInvalid(bet *Bet, partOfParlay bool) {
 	bet.BetStatus = "Lost"
 	fmt.Println("bet is invalid. Marking as Lost.")
+
 }
 
-func (s *BetServer) MarkBetAsPush(bet *Bet) {
+func (s *BetServer) MarkBetAsPush(bet *Bet, partOfParlay bool) {
 	bet.BetStatus = "Pushed"
 	fmt.Println("bet is pushed")
+}
+
+// takes user id
+func (s *BetServer) ChangeUserFundsWin(userId string, amount string) {
+	// remove from pending. Add to profit. Add to balance.
+	coll := s.client.Database("users-db").Collection("users")
+	id, _ := primitive.ObjectIDFromHex(userId)
+	filter := bson.M{"_id": id}
+	user := users.User{}
+	coll.FindOne(context.TODO(), filter).Decode(&user)
+	amt, _ := strconv.ParseFloat(amount, 64)
+	newPendingAmt := user.CurrentPending - amt
+	newBalanceAmt := user.CurrentBalance + amt
+	newProfitAmt := user.TotalProfit + amt
+	update := bson.M{"$set": bson.M{"current_pending": newPendingAmt, "current_balance": newBalanceAmt, "total_profit": newProfitAmt}}
+	coll.UpdateOne(context.TODO(), filter, update)
+}
+
+func (s *BetServer) ChangeUserFundsLose(userId string, amount string) {
+	// remove from pending
+	coll := s.client.Database("users-db").Collection("users")
+	id, _ := primitive.ObjectIDFromHex(userId)
+	filter := bson.M{"_id": id}
+	user := users.User{}
+	coll.FindOne(context.TODO(), filter).Decode(&user)
+	amtToSubtract, _ := strconv.ParseFloat(amount, 64)
+	newAmt := user.CurrentPending - amtToSubtract
+	update := bson.M{"$set": bson.M{"current_pending": newAmt}}
+	coll.UpdateOne(context.TODO(), filter, update)
 }

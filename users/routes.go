@@ -27,6 +27,8 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		}
 	}
 
+	pieces["email"] = strings.ToLower(pieces["email"])
+
 	stripe.Key = "sk_test_WQ4y1OC1xfTS8CCcu8nTKf29"
 
 	params := &stripe.CustomerParams{
@@ -120,7 +122,7 @@ func (s *UserServer) HandleLoginWithoutJWT(c *fiber.Ctx) error {
 		}
 	}
 
-	email := pieces["email"]
+	email := strings.ToLower(pieces["email"])
 	password := pieces["password"]
 
 	user := User{}

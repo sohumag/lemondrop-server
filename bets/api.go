@@ -39,7 +39,7 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 	})
 
 	betsApi.Post("/bet", func(c *fiber.Ctx) error {
-		return s.AddBetToDB(c)
+		return s.HandleBetRequest(c)
 	})
 
 	betsApi.Get("/bet/user/:user", func(c *fiber.Ctx) error {
