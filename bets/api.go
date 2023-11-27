@@ -54,7 +54,7 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 }
 
 func (s *BetServer) Start(api fiber.Router) error {
-	s.RunBetCheckingRepeater()
+	// s.RunBetCheckingRepeater()
 	s.StartBetServerAPI(api)
 	return nil
 }
