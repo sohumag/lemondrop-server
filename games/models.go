@@ -30,6 +30,8 @@ type Game struct {
 	OverPrice       string             `json:"over_price" bson:"over_price"`
 	AwayLogoUrl     string             `json:"away_logo_url" bson:"away_logo_url"`
 	HomeLogoUrl     string             `json:"home_logo_url" bson:"home_logo_url"`
+	AwayRecord      string             `json:"away_record" bson:"away_record"`
+	HomeRecord      string             `json:"home_record" bson:"home_record"`
 }
 
 type Pick struct {
