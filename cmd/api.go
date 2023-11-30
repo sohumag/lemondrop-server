@@ -8,6 +8,7 @@ import (
 	"github.com/rlvgl/bookie-server/assetLookup"
 	"github.com/rlvgl/bookie-server/bets"
 	"github.com/rlvgl/bookie-server/games"
+	"github.com/rlvgl/bookie-server/mailing"
 	"github.com/rlvgl/bookie-server/markets"
 	"github.com/rlvgl/bookie-server/payments"
 	"github.com/rlvgl/bookie-server/verification"
@@ -52,6 +53,9 @@ func StartAPI(port int) error {
 
 	vs := verification.NewVerificationServer()
 	vs.Start(api)
+
+	mas := mailing.NewMailingServer()
+	mas.Start(api)
 
 	// log.Printf("Starting API on port %d\n", port)
 	app.Listen(fmt.Sprintf(":%d", port))
