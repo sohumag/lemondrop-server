@@ -2,6 +2,7 @@ package mailing
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gopkg.in/gomail.v2"
 )
 
 type MailingServer struct {
@@ -68,7 +70,32 @@ func (s *MailingServer) AddUserToMailingList(c *fiber.Ctx) error {
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "email", Value: email.Email}, {Key: "joined_date", Value: email.JoinedDate}}}}
 	opts := options.Update().SetUpsert(true)
 	coll.UpdateOne(context.TODO(), bson.M{"email": email.Email}, update, opts)
+
+	s.SendJoinedMailingListEmail(email.Email, c)
+
 	return nil
+}
+
+func (s *MailingServer) SendJoinedMailingListEmail(email string, c *fiber.Ctx) {
+	sendingEmail := os.Getenv("IMPROVMX_CLIENT_SERVICES_EMAIL")
+	password := os.Getenv("IMPROVMX_CLIENT_SERVICES_PASSWORD")
+	d := gomail.NewDialer("smtp.improvmx.com", 587, sendingEmail, password)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	m := gomail.NewMessage()
+	subjectLine := "Lemondrop: Congrats! You're In."
+	m.SetHeader("From", sendingEmail)
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", subjectLine)
+	body, _ := GetMailingListEmail()
+	m.SetBody("text/html", body)
+
+	if err := d.DialAndSend(m); err != nil {
+		fmt.Println(err)
+	}
+
+	return
+
 }
 
 func (s *MailingServer) Start(api fiber.Router) error {
