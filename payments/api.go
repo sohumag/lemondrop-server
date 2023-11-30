@@ -74,11 +74,12 @@ type Payment struct {
 }
 
 func (s *PaymentServer) HandleWebhook(c *fiber.Ctx) error {
+	fmt.Println("handling webhook")
 	const MaxBodyBytes = int64(65536)
 	body := string(c.Request().Body())
 	// fmt.Fprintf(os.Stdout, "Got body: %s\n", body)
 
-	endpointSecret := os.Getenv("STRIPE_WEBHOOK_SIGNING_SECRET")
+	endpointSecret := os.Getenv("STRIPE_WEBHOOK_SIGNING_SECRET_TEST")
 	// event, err := webhook.ConstructEvent([]byte(body), c.GetReqHeaders()["Stripe-Signature"], endpointSecret)
 	event, err := webhook.ConstructEventWithOptions([]byte(body), c.GetReqHeaders()["Stripe-Signature"], endpointSecret, webhook.ConstructEventOptions{IgnoreAPIVersionMismatch: true})
 
