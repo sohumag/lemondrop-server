@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -61,6 +62,8 @@ func (s *MailingServer) AddUserToMailingList(c *fiber.Ctx) error {
 		c.SendStatus(http.StatusBadRequest)
 		return fmt.Errorf("Missing required field email")
 	}
+
+	email.Email = strings.ToLower(email.Email)
 
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "email", Value: email.Email}, {Key: "joined_date", Value: email.JoinedDate}}}}
 	opts := options.Update().SetUpsert(true)
