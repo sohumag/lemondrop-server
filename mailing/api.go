@@ -6,9 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/lib/pq"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -45,18 +47,24 @@ func (s *MailingServer) StartMailingServerAPI(api fiber.Router) error {
 }
 
 type Email struct {
-	Email string `json:"email" bson:"email"`
+	Email      string    `json:"email" bson:"email"`
+	JoinedDate time.Time `json:"joined_date" bson:"joined_date"`
 }
 
 func (s *MailingServer) AddUserToMailingList(c *fiber.Ctx) error {
 	coll := s.client.Database("mailing").Collection("emails")
 	email := Email{}
+	email.JoinedDate = time.Now()
 	c.BodyParser(&email)
+
 	if email.Email == "" {
 		c.SendStatus(http.StatusBadRequest)
 		return fmt.Errorf("Missing required field email")
 	}
-	coll.InsertOne(context.TODO(), email)
+
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "email", Value: email.Email}, {Key: "joined_date", Value: email.JoinedDate}}}}
+	opts := options.Update().SetUpsert(true)
+	coll.UpdateOne(context.TODO(), bson.M{"email": email.Email}, update, opts)
 	return nil
 }
 
