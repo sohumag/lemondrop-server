@@ -44,7 +44,9 @@ func ValidateJWT(jwtToken string) (string, error) {
 }
 
 func ParseRequestForJWT(c *fiber.Ctx) (string, error) {
+	// fmt.Println(c.Request().Header)
 	val := c.Request().Header.Peek("Bearer-Token")
+	// fmt.Println(string(val))
 	if string(val) == "" {
 		return "", fmt.Errorf("no token in header")
 	}
