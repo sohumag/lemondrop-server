@@ -12,6 +12,7 @@ import (
 	"github.com/stripe/stripe-go/v76/customer"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -114,21 +115,24 @@ func (s *UserServer) HandleLoginWithJWT(c *fiber.Ctx, email string) error {
 }
 
 func (s *UserServer) HandleLoginWithoutJWT(c *fiber.Ctx) error {
-	pieces := ParseRequestBody(c.Body())
-	for _, val := range []string{"email", "password"} {
-		if _, ok := pieces[val]; !ok {
-			c.SendStatus(http.StatusBadRequest)
-			return fiber.ErrBadRequest
-		}
+	var data map[string]string
+	// Unmarshal JSON into the struct
+	err := c.BodyParser(&data)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid JSON format",
+		})
 	}
 
-	email := strings.ToLower(pieces["email"])
-	password := pieces["password"]
+	email := strings.ToLower(data["email"])
+	password := data["password"]
 
 	user := User{}
+
 	coll := s.client.Database("users-db").Collection("users")
-	if err := coll.FindOne(context.TODO(), bson.D{{Key: "email", Value: email}}).Decode(&user); err != nil {
-		c.SendStatus(http.StatusInternalServerError)
+	err = coll.FindOne(context.TODO(), bson.D{{Key: "email", Value: email}}).Decode(&user)
+	if err == mongo.ErrNoDocuments {
+		c.SendStatus(http.StatusNotFound)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err == nil {

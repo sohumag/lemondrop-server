@@ -59,6 +59,7 @@ func (s *MailingServer) AddUserToMailingList(c *fiber.Ctx) error {
 	email := Email{}
 	email.JoinedDate = time.Now()
 	c.BodyParser(&email)
+	// fmt.Println(email)
 
 	if email.Email == "" {
 		c.SendStatus(http.StatusBadRequest)
