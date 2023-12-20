@@ -16,36 +16,37 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// @ WORKS
 func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
-	pieces := ParseRequestBody(c.Body())
-
-	// data validation, regex validation on frontend
-	for _, val := range []string{"last_name", "first_name", "phone_number", "email", "password"} {
-		if _, ok := pieces[val]; !ok {
-			c.SendStatus(http.StatusBadRequest)
-			return fiber.ErrBadRequest
-		}
+	// Parse JSON request body into the map
+	var data map[string]string
+	if err := c.BodyParser(&data); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid JSON format",
+		})
 	}
 
-	pieces["email"] = strings.ToLower(pieces["email"])
+	// Normalize email to lowercase
+	data["email"] = strings.ToLower(data["email"])
 
+	// Set up Stripe API key
 	stripe.Key = "sk_test_WQ4y1OC1xfTS8CCcu8nTKf29"
 
+	// Create a customer on Stripe
 	params := &stripe.CustomerParams{
-		Email: stripe.String(pieces["email"]),
-		Name:  stripe.String(pieces["first_name"] + pieces["last_name"]),
-		Phone: stripe.String(pieces["phone_number"]),
+		Email: stripe.String(data["email"]),
+		Name:  stripe.String(data["first_name"] + data["last_name"]),
+		Phone: stripe.String(data["phone_number"]),
 	}
 	cust, _ := customer.New(params)
 	fmt.Println(cust.ID)
 
+	// Create a User struct
 	user := User{
-		FirstName:           pieces["first_name"],
-		LastName:            pieces["last_name"],
-		PhoneNumber:         pieces["phone_number"],
-		Email:               pieces["email"],
-		Password:            pieces["password"],
+		FirstName:           data["first_name"],
+		LastName:            data["last_name"],
+		PhoneNumber:         data["phone_number"],
+		Email:               data["email"],
+		Password:            data["password"],
 		UserId:              primitive.NewObjectID(),
 		DateJoined:          time.Now(),
 		CurrentBalance:      0,
@@ -56,28 +57,30 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		StripeCustomerId:    cust.ID,
 	}
 
-	fmt.Println(user)
-
-	// encrypting password
-	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(pieces["password"]), 10)
+	// Encrypt password
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(data["password"]), 10)
+	if err != nil {
+		return err
+	}
 	user.Password = string(passwordHash)
 
-	// adding user to database
+	// Add user to the database
 	coll := s.client.Database("users-db").Collection("users")
-
 	result, err := coll.InsertOne(context.TODO(), &user)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
-	fmt.Printf("added user with id: %v\n", result.InsertedID)
+	fmt.Printf("Added user with id: %v\n", result.InsertedID)
 
+	// Generate JWT token
 	jwt, err := GenerateJWT(user.Email)
 	if err != nil {
 		return err
 	}
 
+	// Send JWT token in the response
 	c.Send([]byte(jwt))
 
 	return nil
@@ -165,20 +168,4 @@ func (s *UserServer) HandleLoginWithoutJWT(c *fiber.Ctx) error {
 	}
 
 	return nil
-}
-
-func ParseRequestBody(body []byte) map[string]string {
-	bodyRaw := strings.Trim(string(body), " \n{}")
-	toks := strings.Split(bodyRaw, ",")
-	pieces := map[string]string{}
-	for _, tok := range toks {
-		arr := strings.Split(tok, ":")
-		if len(arr) >= 2 {
-			key := strings.Trim(arr[0], " \"\n")
-			val := strings.Trim(arr[1], " \"\n")
-			pieces[key] = val
-		}
-	}
-
-	return pieces
 }

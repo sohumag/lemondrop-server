@@ -75,6 +75,7 @@ type League struct {
 	LeagueId          string             `json:"league_id" bson:"league_id"`
 	Sport             string             `json:"sport" bson:"sport"`
 	LeagueDescription string             `json:"league_description" bson:"league_description"`
+	Url               string             `json:"url" bson:"url"`
 }
 
 type Sport struct {
