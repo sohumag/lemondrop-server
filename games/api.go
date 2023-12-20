@@ -224,13 +224,15 @@ func (s *GameServer) GetGamesByLeagueId(c *fiber.Ctx) error {
 	fmt.Println("request handling..")
 	coll := s.client.Database("games-db").Collection("scraped-games")
 	currentDate := time.Now()
-	maxDate := currentDate.Add(time.Hour * 24 * 7)
+	// maxDate := currentDate.Add(time.Hour * 24 * 7)
 	parsedLeague := strings.Replace(c.Params("league"), "%20", " ", -1)
 	parsedLeague = strings.ToLower(parsedLeague)
 
-	fmt.Println(parsedLeague)
+	// fmt.Println(parsedLeague)
 
-	cursor, err := coll.Find(context.TODO(), bson.M{"start_date": bson.M{"$gt": currentDate, "$lt": maxDate}, "league_id": parsedLeague})
+	// cursor, err := coll.Find(context.TODO(), bson.M{"league_id": parsedLeague})
+	// cursor, err := coll.Find(context.TODO(), bson.M{"start_date": bson.M{"$gt": currentDate, "$lt": maxDate}, "league_id": parsedLeague})
+	cursor, err := coll.Find(context.TODO(), bson.M{"start_date": bson.M{"$gt": currentDate}, "league_id": parsedLeague})
 	if err != nil {
 		fmt.Printf(err.Error())
 		return err
@@ -251,6 +253,7 @@ func (s *GameServer) DecodeCursorIntoGames(cursor *mongo.Cursor) (*[]Game, error
 	game := &Game{}
 	for cursor.Next(context.TODO()) {
 		cursor.Decode(&game)
+		fmt.Println(game)
 		games = append(games, *game)
 	}
 	return &games, nil
