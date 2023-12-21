@@ -75,9 +75,13 @@ type League struct {
 	LeagueId          string             `json:"league_id" bson:"league_id"`
 	Sport             string             `json:"sport" bson:"sport"`
 	LeagueDescription string             `json:"league_description" bson:"league_description"`
-	Url               string             `json:"url" bson:"url"`
+	PhotoUrl          string             `json:"url" bson:"url"`
+	Active            bool               `json:"active" bson:"active"`
+	Popular           bool               `json:"popular" bson:"popular"`
 }
 
 type Sport struct {
-	Name string `json:"name" bson:"name"`
+	SportId   string `json:"sport_id" bson:"sport_id"`
+	SportName string `json:"name" bson:"name"`
+	PhotoUrl  string `json:"url" bson:"url"`
 }
