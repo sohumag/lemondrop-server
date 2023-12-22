@@ -1,230 +1,148 @@
 package bets
 
-// import (
-// 	"context"
-// 	"fmt"
-// 	"log"
-// 	"strconv"
-// 	"strings"
-// 	"time"
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
 
-// 	"go.mongodb.org/mongo-driver/bson"
-// 	"go.mongodb.org/mongo-driver/bson/primitive"
-// 	"go.mongodb.org/mongo-driver/mongo"
-// )
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
 
-// type GameScore struct {
-// 	ID             primitive.ObjectID `bson:"_id" json:"_id"`
-// 	Completed      bool               `bson:"completed" json:"completed"`
-// 	AwayTeamName   string             `json:"away_team_name" bson:"away_team_name"`
-// 	HomeTeamName   string             `json:"home_team_name" bson:"home_team_name"`
-// 	AwayFinalScore string             `json:"away_final_score" bson:"away_final_score"`
-// 	HomeFinalScore string             `json:"home_final_score" bson:"home_final_score"`
-// 	StartDate      time.Time          `json:"start_date" bson:"start_date"`
-// 	EspnHash       string             `json:"espn_hash" bson:"espn_hash"`
-// 	DkHash         string             `json:"dk_hash" bson:"dk_hash"`
-// 	League         string             `json:"league" bson:"league"`
-// }
+func (s *BetServer) BetChecker() error {
+	allBets, err := s.GetPendingBets()
+	if err != nil {
+		return err
+	}
+	allScores, err := s.GetAllScores()
+	if err != nil {
+		fmt.Println(err)
+	}
 
-// // RunBetCheckingRepeater fetches pending bets, checks their status, and updates the database.
-// func (s *BetServer) RunBetCheckingRepeater() {
-// 	coll := s.client.Database("bets-db").Collection("bets")
-// 	filter := bson.D{{Key: "bet_status", Value: "Pending"}}
-// 	cursor, err := coll.Find(context.TODO(), filter)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	for _, bet := range allBets {
+		if bet.IsParlay {
+			continue
+		} else {
+			_, err = s.CheckBetSelection(&bet.Selections[0], allScores)
+		}
+	}
 
-// 	var allBets []Bet
-// 	for cursor.Next(context.TODO()) {
-// 		var bet Bet
-// 		if err := cursor.Decode(&bet); err != nil {
-// 			log.Fatal(err)
-// 		}
-// 		allBets = append(allBets, bet)
-// 	}
+	return nil
+}
 
-// 	for _, bet := range allBets {
-// 		if bet.IsParlay {
-// 			s.CheckParlay(&bet)
-// 		} else {
-// 			s.CheckBet(&bet, false)
-// 		}
+// can implement some sort of cache
+func (s *BetServer) CheckBetSelection(selection *BetSelection, allScores []Score) (string, error) { // returns new status, error
+	homeTeam := selection.HomeTeamName
+	awayTeam := selection.HomeTeamName
+	// leagueId := selection.LeagueID
 
-// 		filter := bson.D{{Key: "_id", Value: bet.BetId}}
-// 		update := bson.D{{Key: "$set", Value: bson.D{{Key: "bet_status", Value: bet.BetStatus}, {Key: "parlay_finished", Value: bet.ParlayFinished}}}}
-// 		_, err := coll.UpdateOne(context.TODO(), filter, update)
-// 		if err != nil {
-// 			fmt.Println(err)
-// 			return
-// 		}
-// 	}
-// }
+	// get info from mongo using game hash
 
-// // CheckParlay checks the status of a parlay bet.
-// func (s *BetServer) CheckParlay(parlay *Bet) {
-// 	s.UpdateParlayStatus(parlay)
-// 	if parlay.ParlayFinished {
-// 		return
-// 	}
+	// homeTeam := "Cleveland Cavaliers"
+	// awayTeam := "Utah Jazz"
+	// needs to have game commence time
+	leagueId := "basketball_nba"
 
-// 	for _, bet := range parlay.Bets {
-// 		s.CheckBet(&bet, true)
-// 	}
+	allScoresAwayTeams := map[string]string{}
+	allScoresHomeTeams := map[string]string{}
+	for _, score := range allScores {
+		if score.LeagueID != leagueId {
+			continue
+		}
+		allScoresAwayTeams[score.AwayTeamName] = score.Hash
+		allScoresHomeTeams[score.HomeTeamName] = score.Hash
+	}
 
-// 	s.UpdateParlayStatus(parlay)
-// }
+	closestGameHash, homeTeamDist := findClosestMatch(homeTeam, allScoresHomeTeams)
+	closestGameHash, awayTeamDist := findClosestMatch(awayTeam, allScoresAwayTeams)
 
-// // UpdateParlayStatus updates the status of a parlay bet.
-// func (s *BetServer) UpdateParlayStatus(parlay *Bet) {
-// 	inProgress := false
-// 	lost := false
+	fmt.Printf("%v @ %v: %v %v. Hash is %v\n", awayTeam, homeTeam, awayTeamDist, homeTeamDist, closestGameHash)
+	return "", nil
+}
 
-// 	for _, bet := range parlay.Bets {
-// 		if bet.BetStatus == "Pending" {
-// 			inProgress = true
-// 			break
-// 		} else if bet.BetStatus == "Lost" {
-// 			lost = true
-// 		}
-// 	}
+func findClosestMatch(query string, nameHash map[string]string) (string, float64) {
+	var maxSimilarity float64
+	var closestMatch string
 
-// 	if inProgress {
-// 		return
-// 	} else if lost {
-// 		s.setParlayResult(parlay, "Lost")
-// 		s.ChangeUserFundsWin(parlay.UserId, parlay.BetAmount)
-// 	} else {
-// 		s.setParlayResult(parlay, "Won")
-// 		s.ChangeUserFundsLose(parlay.UserId, parlay.BetAmount)
-// 	}
-// }
+	for teamName := range nameHash {
+		overlapCount := overlapCount(query, teamName)
 
-// // setParlayResult sets the result for a parlay bet.
-// func (s *BetServer) setParlayResult(parlay *Bet, result string) {
-// 	parlay.ParlayFinished = true
-// 	parlay.BetStatus = result
-// }
+		// Calculate Jaccard Similarity
+		jaccardSimilarity := float64(overlapCount) / float64(len(query)+len(teamName)-overlapCount)
 
-// // CheckBet checks the status of a single bet.
-// func (s *BetServer) CheckBet(bet *Bet, partOfParlay bool) {
-// 	coll := s.client.Database("games-db").Collection("scraped-scores")
-// 	gameScore := GameScore{}
-// 	filter := bson.D{{Key: "dk_hash", Value: bet.GameHash}}
+		if closestMatch == "" || jaccardSimilarity > maxSimilarity {
+			maxSimilarity = jaccardSimilarity
+			closestMatch = teamName
+		}
+	}
 
-// 	if err := coll.FindOne(context.TODO(), filter).Decode(&gameScore); err != nil {
-// 		if err == mongo.ErrNoDocuments {
-// 			// Game hasn't happened yet
-// 			return
-// 		}
-// 		log.Fatal(err)
-// 	}
+	return closestMatch, maxSimilarity
+}
 
-// 	// Process the bet based on its type
-// 	switch strings.ToLower(bet.BetType) {
-// 	case "moneyline":
-// 		s.processMoneyLineBet(bet, gameScore)
-// 	case "spread":
-// 		s.processSpreadBet(bet, gameScore)
-// 	case "over", "under":
-// 		s.processOverUnderBet(bet, gameScore)
-// 	}
-// }
+func (s *BetServer) GetPendingBets() ([]Bet, error) {
+	// Access the specified database and collection
+	coll := s.client.Database("bets-db").Collection("bets")
 
-// // processMoneyLineBet processes a moneyline bet.
-// func (s *BetServer) processMoneyLineBet(bet *Bet, gameScore GameScore) {
-// 	awayScore, _ := strconv.Atoi(gameScore.AwayFinalScore)
-// 	homeScore, _ := strconv.Atoi(gameScore.HomeFinalScore)
+	// Define a filter to get all documents (if you have any specific filter criteria, you can modify it)
+	filter := bson.D{{"bet_status", "Pending"}}
 
-// 	if bet.BetOnTeam == bet.AwayTeam && awayScore > homeScore {
-// 		s.MarkBetAsValid(bet, false)
-// 	} else if bet.BetOnTeam == bet.HomeTeam && homeScore > awayScore {
-// 		s.MarkBetAsValid(bet, false)
-// 	} else {
-// 		s.MarkBetAsInvalid(bet, false)
-// 	}
-// }
+	// Perform the query to get all bets
+	cursor, err := coll.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.TODO())
 
-// // processSpreadBet processes a spread bet.
-// func (s *BetServer) processSpreadBet(bet *Bet, gameScore GameScore) {
-// 	numPoint, _ := strconv.ParseFloat(bet.BetPoint[1:], 64)
-// 	homeScore, _ := strconv.ParseFloat(gameScore.HomeFinalScore, 64)
-// 	awayScore, _ := strconv.ParseFloat(gameScore.AwayFinalScore, 64)
+	// Decode the results into a slice of Bet objects
+	var allBets []Bet
+	for cursor.Next(context.TODO()) {
+		var bet Bet
+		if err := cursor.Decode(&bet); err != nil {
+			log.Println("Error decoding bet:", err)
+		}
+		allBets = append(allBets, bet)
+	}
 
-// 	if strings.Contains(bet.BetOnTeam, bet.AwayTeam) && awayScore+numPoint > awayScore {
-// 		s.MarkBetAsValid(bet, false)
-// 	} else if strings.Contains(bet.BetOnTeam, bet.HomeTeam) && homeScore+numPoint > awayScore {
-// 		s.MarkBetAsValid(bet, false)
-// 	} else {
-// 		s.MarkBetAsInvalid(bet, false)
-// 	}
-// }
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
 
-// // processOverUnderBet processes an over/under bet.
-// func (s *BetServer) processOverUnderBet(bet *Bet, gameScore GameScore) {
-// 	point, _ := strconv.ParseFloat(bet.BetPoint, 64)
-// 	homeScore, _ := strconv.ParseFloat(gameScore.HomeFinalScore, 64)
-// 	awayScore, _ := strconv.ParseFloat(gameScore.AwayFinalScore, 64)
-// 	teamTotal := homeScore + awayScore
+	return allBets, nil
+}
 
-// 	if strings.ToLower(bet.BetType) == "over" && teamTotal > point {
-// 		s.MarkBetAsValid(bet, false)
-// 	} else if strings.ToLower(bet.BetType) == "under" && teamTotal < point {
-// 		s.MarkBetAsValid(bet, false)
-// 	} else {
-// 		s.MarkBetAsInvalid(bet, false)
-// 	}
-// }
+func (s *BetServer) GetAllScores() ([]Score, error) {
+	coll := s.client.Database("games-db").Collection("scraped-scores")
 
-// // MarkBetAsValid marks a bet as valid and updates user funds.
-// func (s *BetServer) MarkBetAsValid(bet *Bet, partOfParlay bool) {
-// 	bet.BetStatus = "Won"
-// 	fmt.Println("Bet is valid. Marking as Won.")
-// 	if !partOfParlay {
-// 		s.ChangeUserFundsWin(bet.UserId, bet.BetAmount)
-// 	}
-// }
+	// Define a filter to get scores in the last 3 days
+	threeDaysAgo := time.Now().AddDate(0, 0, -2)
+	filter := bson.D{
+		{"start_date", bson.D{{"$gte", threeDaysAgo}}},
+	}
 
-// // MarkBetAsInvalid marks a bet as invalid.
-// func (s *BetServer) MarkBetAsInvalid(bet *Bet, partOfParlay bool) {
-// 	bet.BetStatus = "Lost"
-// 	fmt.Println("Bet is invalid. Marking as Lost.")
-// }
+	// Define options to sort by start_date in descending order
+	options := options.Find().SetSort(bson.D{{"start_date", -1}})
 
-// // ChangeUserFundsWin updates user funds for a winning bet.
-// func (s *BetServer) ChangeUserFundsWin(userID string, amount string) {
-// 	s.changeUserFunds(userID, amount, true)
-// }
+	// Perform the query to get scores
+	cursor, err := coll.Find(context.TODO(), filter, options)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.TODO())
 
-// // ChangeUserFundsLose updates user funds for a losing bet.
-// func (s *BetServer) ChangeUserFundsLose(userID string, amount string) {
-// 	s.changeUserFunds(userID, amount, false)
-// }
+	// Decode the results into a slice of Score objects
+	var allScores []Score
+	for cursor.Next(context.TODO()) {
+		var score Score
+		if err := cursor.Decode(&score); err != nil {
+			log.Println("Error decoding score:", err)
+		}
+		allScores = append(allScores, score)
+	}
 
-// // changeUserFunds updates user funds based on the bet result.
-// func (s *BetServer) changeUserFunds(userID string, amount string, isWin bool) {
-// 	coll := s.client.Database("users-db").Collection("users")
-// 	id, _ := primitive.ObjectIDFromHex(userID)
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
 
-// 	var update bson.M
-// 	if isWin {
-// 		amt, _ := strconv.ParseFloat(amount, 64)
-// 		update = bson.M{
-// 			"$set": bson.M{
-// 				"current_pending": 0,
-// 				"current_balance": "$current_balance + " + amount,
-// 				"total_profit":    "$total_profit + " + amount,
-// 			},
-// 		}
-// 	} else {
-// 		amtToSubtract, _ := strconv.ParseFloat(amount, 64)
-// 		update = bson.M{
-// 			"$set": bson.M{
-// 				"current_pending": "$current_pending - " + amount,
-// 			},
-// 		}
-// 	}
-
-// 	filter := bson.M{"_id": id}
-// 	coll.UpdateOne(context.TODO(), filter, update)
-// }
+	return allScores, nil
+}
