@@ -56,7 +56,7 @@ func (s *VerificationServer) Start(api fiber.Router) error {
 }
 
 func (s *VerificationServer) SendEmail() error {
-	from := mail.NewEmail("Help Email", "help@lemondrop.bet")
+	from := mail.NewEmail("Help Email", "help@lemondrop.ag")
 	subject := "Please Verify Your Email"
 	to := mail.NewEmail("Sohum", "agrawalsohum@gmail.com")
 	plainTextContent := "and easy to do anywhere, even with Go"

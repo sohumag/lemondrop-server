@@ -230,8 +230,8 @@ func (s *PaymentServer) HandleCheckoutRequest(c *fiber.Ctx) error {
 			},
 		},
 		Mode:              stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL:        stripe.String("https://lemondrop.bet/checkout?success=true"),
-		CancelURL:         stripe.String("https://lemondrop.bet/dashboard"),
+		SuccessURL:        stripe.String("https://lemondrop.ag/bets"),
+		CancelURL:         stripe.String("https://lemondrop.ag/bets"),
 		ClientReferenceID: stripe.String(c.Params("id")),
 	}
 
