@@ -44,9 +44,6 @@ func (s *GameServer) GetGamesByLeagueId(c *fiber.Ctx) error {
 	parsedLeague := strings.Replace(c.Params("league"), "%20", " ", -1)
 	parsedLeague = strings.ToLower(parsedLeague)
 
-	// fmt.Println(parsedLeague)
-
-	// cursor, err := coll.Find(context.TODO(), bson.M{"league_id": parsedLeague})
 	// cursor, err := coll.Find(context.TODO(), bson.M{"start_date": bson.M{"$gt": currentDate, "$lt": maxDate}, "league_id": parsedLeague})
 	cursor, err := coll.Find(context.TODO(), bson.M{"start_date": bson.M{"$gt": currentDate}, "league_id": parsedLeague})
 	if err != nil {

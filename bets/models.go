@@ -15,13 +15,17 @@ type Bet struct {
 	Selections []BetSelection     `bson:"selections" json:"selections"`
 
 	// server managed
-	Status         string    `bson:"bet_status" json:"bet_status"`
+	Status         string    `bson:"bet_status" json:"bet_status"` // Pending, Won, Lost, Pushed
 	ParlayFinished bool      `bson:"parlay_finished" json:"parlay_finished"`
 	PlacedAt       time.Time `bson:"placed_at" json:"placed_at"`
 	// jwt??
 }
 
-// BetSelection represents a selection within a bet.
+// betType: spread, moneyline, total, prop
+// // propType: game, player, etc. empty for now
+// propName: name of category (player points, 2+ made threes, alternative spreads, 1st quarter total poitns ...)
+// playerName: name of player who bet is placed on (pascal siakam over,  Washington wizards -1.5)
+
 type BetSelection struct {
 	BetType    string `bson:"bet_type" json:"bet_type"`
 	PropType   string `bson:"prop_type,omitempty" json:"prop_type,omitempty"`
@@ -56,16 +60,16 @@ type Score struct {
 	Hash           string             `bson:"hash" json:"hash"`
 	LeagueID       string             `bson:"league_id" json:"league_id"`
 
-	AwayFirstQuarter  string         `bson:"away_first_quarter" json:"away_first_quarter"`
-	AwaySecondQuarter string         `bson:"away_second_quarter" json:"away_second_quarter"`
-	AwayThirdQuarter  string         `bson:"away_third_quarter" json:"away_third_quarter"`
-	AwayFourthQuarter string         `bson:"away_fourth_quarter" json:"away_fourth_quarter"`
-	AwayPlayerStats   []PlayerStats  `bson:"away_player_stats" json:"away_player_stats"`
-	HomeFirstQuarter  string         `bson:"home_first_quarter" json:"home_first_quarter"`
-	HomeSecondQuarter string         `bson:"home_second_quarter" json:"home_second_quarter"`
-	HomeThirdQuarter  string         `bson:"home_third_quarter" json:"home_third_quarter"`
-	HomeFourthQuarter string         `bson:"home_fourth_quarter" json:"home_fourth_quarter"`
-	HomePlayerScores  []PlayerScores `bson:"home_player_scores" json:"home_player_scores"`
+	AwayFirstQuarter  string        `bson:"away_first_quarter" json:"away_first_quarter"`
+	AwaySecondQuarter string        `bson:"away_second_quarter" json:"away_second_quarter"`
+	AwayThirdQuarter  string        `bson:"away_third_quarter" json:"away_third_quarter"`
+	AwayFourthQuarter string        `bson:"away_fourth_quarter" json:"away_fourth_quarter"`
+	AwayPlayerStats   []PlayerStats `bson:"away_player_stats" json:"away_player_stats"`
+	HomeFirstQuarter  string        `bson:"home_first_quarter" json:"home_first_quarter"`
+	HomeSecondQuarter string        `bson:"home_second_quarter" json:"home_second_quarter"`
+	HomeThirdQuarter  string        `bson:"home_third_quarter" json:"home_third_quarter"`
+	HomeFourthQuarter string        `bson:"home_fourth_quarter" json:"home_fourth_quarter"`
+	HomePlayerStats   []PlayerStats `bson:"home_player_stats" json:"home_player_stats"`
 }
 
 type PlayerStats struct {

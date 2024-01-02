@@ -2,7 +2,6 @@ package games
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -63,6 +62,10 @@ func (s *GameServer) StartGameServerAPI(api fiber.Router) error {
 		return s.GetAllSports(c)
 	})
 
+	leaguesApi.Get("/:sport", func(c *fiber.Ctx) error {
+		return s.GetAllLeaguesBySport(c)
+	})
+
 	return nil
 }
 
@@ -71,7 +74,6 @@ func (s *GameServer) DecodeCursorIntoGames(cursor *mongo.Cursor) (*[]Game, error
 	game := &Game{}
 	for cursor.Next(context.TODO()) {
 		cursor.Decode(&game)
-		fmt.Println(game)
 		games = append(games, *game)
 	}
 	return &games, nil

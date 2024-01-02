@@ -3,6 +3,7 @@ package games
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -84,6 +85,32 @@ func (s *GameServer) GetAllLeagues(c *fiber.Ctx) error {
 		cursor.Decode(&league)
 		leagues = append(leagues, league)
 	}
+	c.JSON(leagues)
+	return nil
+}
+
+func (s *GameServer) GetAllLeaguesBySport(c *fiber.Ctx) error {
+	sport := c.Params("sport")
+	fmt.Println(sport)
+
+	coll := s.client.Database("games-db").Collection("leagues")
+	cursor, err := coll.Find(context.TODO(), bson.M{"active": true})
+
+	if err != nil {
+		fmt.Printf(err.Error())
+		return err
+	}
+
+	leagues := []League{}
+	league := League{}
+	for cursor.Next(context.TODO()) {
+		// add only if league is part of sport
+		cursor.Decode(&league)
+		if strings.Replace(strings.ToLower(league.Sport), " ", "_", -1) == sport {
+			leagues = append(leagues, league)
+		}
+	}
+
 	c.JSON(leagues)
 	return nil
 }

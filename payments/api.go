@@ -56,12 +56,16 @@ func (s *PaymentServer) StartPaymentServerAPI(api fiber.Router) error {
 		return s.HandleCheckoutRequest(c)
 	})
 
-	paymentsApi.Post("/payout", func(c *fiber.Ctx) error {
-		return s.HandlePayoutRequest(c)
-	})
+	// paymentsApi.Post("/payout", func(c *fiber.Ctx) error {
+	// 	return s.HandlePayoutRequest(c)
+	// })
 
 	paymentsApi.Post("/webhook", func(c *fiber.Ctx) error {
 		return s.HandleWebhook(c)
+	})
+
+	paymentsApi.Post("/payout", func(c *fiber.Ctx) error {
+		return s.HandlePayout(c)
 	})
 	return nil
 }

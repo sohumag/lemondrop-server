@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -29,7 +30,24 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 	data["email"] = strings.ToLower(data["email"])
 
 	// Set up Stripe API key
-	stripe.Key = "sk_test_WQ4y1OC1xfTS8CCcu8nTKf29"
+	stripe.Key = os.Getenv("STRIPE_SECRET_TEST_KEY")
+
+	// params := &stripe.AccountParams{Type: stripe.String(string(stripe.AccountTypeExpress))}
+	// result, err := account.New(params)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return err
+	// }
+	// accountId := result.ID
+	// fmt.Println(accountId)
+
+	// linkParams := &stripe.AccountLinkParams{
+	// 	Account:    stripe.String(accountId),
+	// 	RefreshURL: stripe.String("https://example.com/reauth"),
+	// 	ReturnURL:  stripe.String("https://example.com/return"),
+	// 	Type:       stripe.String("account_onboarding"),
+	// }
+	// _, err = accountlink.New(linkParams)
 
 	// Create a customer on Stripe
 	params := &stripe.CustomerParams{
@@ -66,13 +84,13 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 
 	// Add user to the database
 	coll := s.client.Database("users-db").Collection("users")
-	result, err := coll.InsertOne(context.TODO(), &user)
+	res, err := coll.InsertOne(context.TODO(), &user)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
-	fmt.Printf("Added user with id: %v\n", result.InsertedID)
+	fmt.Printf("Added user with id: %v\n", res.InsertedID)
 
 	// Generate JWT token
 	jwt, err := GenerateJWT(user.Email)
