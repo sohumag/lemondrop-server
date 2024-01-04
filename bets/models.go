@@ -27,11 +27,11 @@ type Bet struct {
 // playerName: name of player who bet is placed on (pascal siakam over,  Washington wizards -1.5)
 
 type BetSelection struct {
+	BetOn      string `bson:"bet_on" json:"bet_on"`
 	BetType    string `bson:"bet_type" json:"bet_type"`
 	PropType   string `bson:"prop_type,omitempty" json:"prop_type,omitempty"`
 	PropName   string `bson:"prop_name,omitempty" json:"prop_name,omitempty"`
 	PlayerName string `bson:"player_name,omitempty" json:"player_name,omitempty"`
-	BetOn      string `bson:"bet_on" json:"bet_on"`
 	BetPoint   string `bson:"bet_point,omitempty" json:"bet_point,omitempty"`
 	Odds       string `bson:"odds,omitempty" json:"odds,omitempty"`
 

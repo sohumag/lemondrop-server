@@ -2,9 +2,12 @@ package users
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -17,7 +20,54 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func GenerateReferralCode() (string, error) {
+	// Define the length of the referral code
+	codeLength := 6
+
+	// Define the character set for the code
+	charSet := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	// Calculate the required number of bytes
+	byteLength := (codeLength * 6) / 8
+
+	// Generate random bytes
+	randomBytes := make([]byte, byteLength)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return "", err
+	}
+
+	// Convert random bytes to a big integer
+	randomInt := new(big.Int).SetBytes(randomBytes)
+
+	// Generate the referral code using the character set
+	referralCode := make([]byte, codeLength)
+	for i := range referralCode {
+		index := new(big.Int).Mod(randomInt, big.NewInt(int64(len(charSet))))
+		referralCode[i] = charSet[index.Int64()]
+		randomInt.Div(randomInt, big.NewInt(int64(len(charSet))))
+	}
+
+	return string(referralCode), nil
+}
+
+func IsValidEmail(email string) bool {
+	// Define the email validation regex pattern
+	emailPattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	// Compile the regex pattern
+	regex := regexp.MustCompile(emailPattern)
+
+	// Test if the email matches the pattern
+	return regex.MatchString(email)
+}
+
 func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
+	referralCode, err := GenerateReferralCode()
+	if err != nil {
+		return err
+	}
+
 	// Parse JSON request body into the map
 	var data map[string]string
 	if err := c.BodyParser(&data); err != nil {
@@ -26,8 +76,13 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		})
 	}
 
+	referredFromCode := data["referred_from_code"]
+
 	// Normalize email to lowercase
 	data["email"] = strings.ToLower(data["email"])
+	if !IsValidEmail(data["email"]) {
+		return fmt.Errorf("invalid email")
+	}
 
 	// Set up Stripe API key
 	stripe.Key = os.Getenv("STRIPE_SECRET_TEST_KEY")
@@ -73,6 +128,8 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		CurrentPending:      0,
 		TotalProfit:         0,
 		StripeCustomerId:    cust.ID,
+		ReferralCode:        referralCode,
+		ReferredFromCode:    referredFromCode,
 	}
 
 	// Encrypt password
@@ -164,12 +221,12 @@ func (s *UserServer) HandleLoginWithoutJWT(c *fiber.Ctx) error {
 		}
 
 		cuser := ClientUser{
-			FirstName:   user.FirstName,
-			LastName:    user.LastName,
-			PhoneNumber: user.PhoneNumber,
-			Email:       user.Email,
-			JWT:         jwt,
-
+			FirstName:           user.FirstName,
+			LastName:            user.LastName,
+			PhoneNumber:         user.PhoneNumber,
+			Email:               user.Email,
+			JWT:                 jwt,
+			ReferralCode:        user.ReferralCode,
 			UserId:              user.UserId,
 			DateJoined:          user.DateJoined,
 			CurrentBalance:      user.CurrentBalance,

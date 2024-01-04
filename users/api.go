@@ -19,6 +19,12 @@ import (
 
 */
 
+/*
+	Referrals:
+	- each user has: unique 6 digit code and shareable link
+
+*/
+
 func NewUserServer() *UserServer {
 	return &UserServer{
 		client: ConnectDB(),
