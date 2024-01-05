@@ -13,6 +13,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/account"
+	"github.com/stripe/stripe-go/v76/accountlink"
 	"github.com/stripe/stripe-go/v76/customer"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -62,6 +64,25 @@ func IsValidEmail(email string) bool {
 	return regex.MatchString(email)
 }
 
+// returns Account Link URL, error
+func (s *UserServer) HandleAccountLink(accountId string) (string, error) {
+	accountLinkParams := &stripe.AccountLinkParams{
+		Account:    stripe.String(accountId),
+		RefreshURL: stripe.String("https://lemondrop.ag/bets"),
+		ReturnURL:  stripe.String("https://lemondrop.ag/bets"),
+		Type:       stripe.String("account_onboarding"),
+		Collect:    stripe.String("eventually_due"),
+	}
+
+	accountLinkResult, err := accountlink.New(accountLinkParams)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	return accountLinkResult.URL, nil
+}
+
 func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 	referralCode, err := GenerateReferralCode()
 	if err != nil {
@@ -83,26 +104,35 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 	if !IsValidEmail(data["email"]) {
 		return fmt.Errorf("invalid email")
 	}
+	email := data["email"]
 
 	// Set up Stripe API key
 	stripe.Key = os.Getenv("STRIPE_SECRET_TEST_KEY")
 
-	// params := &stripe.AccountParams{Type: stripe.String(string(stripe.AccountTypeExpress))}
-	// result, err := account.New(params)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return err
-	// }
-	// accountId := result.ID
-	// fmt.Println(accountId)
+	accountParams := &stripe.AccountParams{
+		Country: stripe.String("US"),
+		Type:    stripe.String(string(stripe.AccountTypeExpress)),
+		Capabilities: &stripe.AccountCapabilitiesParams{
+			CardPayments: &stripe.AccountCapabilitiesCardPaymentsParams{
+				Requested: stripe.Bool(true),
+			},
+			Transfers: &stripe.AccountCapabilitiesTransfersParams{Requested: stripe.Bool(true)},
+		},
+		BusinessType: stripe.String(string(stripe.AccountBusinessTypeIndividual)),
+		Email:        &email,
+		// BusinessProfile: &stripe.AccountBusinessProfileParams{
+		// 	URL: stripe.String("https://example.com"),
+		// },
+		BusinessProfile: &stripe.AccountBusinessProfileParams{MCC: stripe.String("7995")},
+	}
+	result, err := account.New(accountParams)
+	if err != nil {
+		fmt.Println(err)
+	}
+	accountId := result.ID
+	fmt.Println(accountId)
 
-	// linkParams := &stripe.AccountLinkParams{
-	// 	Account:    stripe.String(accountId),
-	// 	RefreshURL: stripe.String("https://example.com/reauth"),
-	// 	ReturnURL:  stripe.String("https://example.com/return"),
-	// 	Type:       stripe.String("account_onboarding"),
-	// }
-	// _, err = accountlink.New(linkParams)
+	redirectUrl, err := s.HandleAccountLink(accountId)
 
 	// Create a customer on Stripe
 	params := &stripe.CustomerParams{
@@ -111,25 +141,29 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		Phone: stripe.String(data["phone_number"]),
 	}
 	cust, _ := customer.New(params)
-	fmt.Println(cust.ID)
 
 	// Create a User struct
 	user := User{
-		FirstName:           data["first_name"],
-		LastName:            data["last_name"],
-		PhoneNumber:         data["phone_number"],
-		Email:               data["email"],
-		Password:            data["password"],
-		UserId:              primitive.NewObjectID(),
-		DateJoined:          time.Now(),
+		FirstName:   data["first_name"],
+		LastName:    data["last_name"],
+		PhoneNumber: data["phone_number"],
+		Email:       data["email"],
+		Password:    data["password"],
+		UserId:      primitive.NewObjectID(),
+		DateJoined:  time.Now(),
+
 		CurrentBalance:      0,
 		CurrentAvailability: 0,
 		CurrentFreePlay:     0,
 		CurrentPending:      0,
 		TotalProfit:         0,
-		StripeCustomerId:    cust.ID,
-		ReferralCode:        referralCode,
-		ReferredFromCode:    referredFromCode,
+
+		StripeCustomerId: cust.ID,
+		StripeExpressId:  accountId,
+		DetailsSubmitted: false,
+
+		ReferralCode:     referralCode,
+		ReferredFromCode: referredFromCode,
 	}
 
 	// Encrypt password
@@ -155,9 +189,21 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Send JWT token in the response
-	c.Send([]byte(jwt))
+	c.JSON(fiber.Map{
+		"jwt":          jwt,
+		"redirect_url": redirectUrl,
+	})
 
+	// dataMap := map[interface{}]interface{}{
+	// 	"jwt":          jwt,
+	// 	"redirect_url": redirectUrl,
+	// 	// "stripe_account_id": accountId,
+	// 	// "details_submitted": false,
+	// }
+
+	// fmt.Println(dataMap)
+
+	// c.JSON(dataMap)
 	return nil
 }
 

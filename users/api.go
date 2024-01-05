@@ -2,11 +2,11 @@ package users
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	_ "github.com/lib/pq"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -52,6 +52,17 @@ func (s *UserServer) StartUserServerAPI(api fiber.Router) error {
 
 	usersApi.Post("/login", func(c *fiber.Ctx) error {
 		return s.HandleLoginRoute(c)
+	})
+
+	usersApi.Post("/account-link/:accountId", func(c *fiber.Ctx) error {
+		fmt.Println("linking account..")
+		accountId := c.Params("accountId")
+		url, err := s.HandleAccountLink(accountId)
+		if err != nil {
+			return err
+		}
+		c.JSON(fiber.Map{"url": url})
+		return nil
 	})
 
 	return nil
