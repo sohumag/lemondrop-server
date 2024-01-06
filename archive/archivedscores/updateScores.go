@@ -7,9 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/go-co-op/gocron"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -23,14 +21,14 @@ var validLeagues = []string{}
 
 func (s *ScoreServer) StartScoresUpdates() error {
 
-	scheduler := gocron.NewScheduler(time.UTC)
-	_, err := scheduler.Every(1).Day().At("23:59").At("15:00").Do(func() {
-		s.UpdateScores()
-	})
+	// scheduler := gocron.NewScheduler(time.UTC)
+	// _, err := scheduler.Every(1).Day().At("23:59").At("15:00").Do(func() {
+	// 	s.UpdateScores()
+	// })
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

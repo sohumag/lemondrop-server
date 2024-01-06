@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/lib/pq"
@@ -20,7 +19,6 @@ func NewBetServer() *BetServer {
 type BetServer struct {
 	client *mongo.Client
 	queue  chan *Bet
-	wg     sync.WaitGroup
 }
 
 func ConnectDB() *mongo.Client {
@@ -46,13 +44,43 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 		return s.HandleBetRequest(c)
 	})
 
-	// betsApi.Get("/bet/user/:user", func(c *fiber.Ctx) error {
-	// 	return s.GetAllBetsByUserId(c, c.Params("user"))
-	// })
+	betsApi.Get("/bet/user/:user", func(c *fiber.Ctx) error {
+		return s.GetAllBetsByUserId(c)
+	})
 
 	// betsApi.Get("/all", func(c *fiber.Ctx) error {
 	// 	return s.GetAllBets(c)
 	// })
+
+	return nil
+}
+
+func (s *BetServer) GetAllBetsByUserId(c *fiber.Ctx) error {
+	userId := c.Params("user")
+
+	coll := s.client.Database("bets-db").Collection("bets")
+	filter := bson.D{{Key: "user_id", Value: userId}}
+
+	options := options.Find()
+	options.SetSort(bson.D{{Key: "placed_at", Value: -1}}) // Sort in descending order based on "placed_at"
+
+	cursor, err := coll.Find(context.Background(), filter, options)
+	if err != nil {
+		return err
+	}
+
+	bets := []Bet{}
+	var bet Bet
+	for cursor.Next(context.Background()) {
+		// Create a new instance of Bet for each iteration
+		bet = Bet{}
+		if err := cursor.Decode(&bet); err != nil {
+			continue
+		}
+		bets = append(bets, bet)
+	}
+
+	c.JSON(bets)
 
 	return nil
 }

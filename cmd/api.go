@@ -10,11 +10,9 @@ import (
 	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/mailing"
 	"github.com/rlvgl/bookie-server/markets"
-	"github.com/rlvgl/bookie-server/payments"
-	"github.com/rlvgl/bookie-server/verification"
-
-	// "github.com/rlvgl/bookie-server/scores"
+	"github.com/rlvgl/bookie-server/messages"
 	"github.com/rlvgl/bookie-server/users"
+	"github.com/rlvgl/bookie-server/verification"
 )
 
 func StartAPI(port int) error {
@@ -22,7 +20,7 @@ func StartAPI(port int) error {
 	app.Use(cors.New())
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:5173, https://lemondrop.bet, https://lemondrop.ag, http://localhost:3000",
+		AllowOrigins: "https://lemondrop.bet, https://lemondrop.ag, http://localhost:3000",
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
@@ -39,14 +37,14 @@ func StartAPI(port int) error {
 	us := users.NewUserServer()
 	us.Start(api)
 
-	ps := payments.NewPaymentServer()
-	ps.Start(api)
-
 	bs := bets.NewBetServer()
 	bs.Start(api)
 
 	ms := markets.NewMarketServer()
 	ms.Start(api)
+
+	mes := messages.NewMessageServer()
+	mes.Start(api)
 
 	as := assetLookup.NewAssetServer()
 	as.Start(api)

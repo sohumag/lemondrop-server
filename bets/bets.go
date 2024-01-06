@@ -33,9 +33,9 @@ func (s *BetServer) HandleBetRequest(c *fiber.Ctx) error {
 		filter := bson.D{{Key: "hash", Value: bet.Selections[0].GameHash}}
 
 		game := games.Game{}
-		coll.FindOne(context.Background(), filter).Decode(game)
+		coll.FindOne(context.Background(), filter).Decode(&game)
 
-		if bet.PlacedAt.After(game.StartDate) {
+		if time.Now().After(game.StartDate) {
 			return fmt.Errorf("") // leave empty bc most likely hack attempt
 		}
 
@@ -65,6 +65,7 @@ func (s *BetServer) HandleBetRequest(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
+		fmt.Println("transaction failed")
 		return c.Status(http.StatusInternalServerError).SendString("Transaction failed")
 	}
 
@@ -90,17 +91,34 @@ func (s *BetServer) HandleBet(bet *Bet, sessionContext mongo.SessionContext) err
 		return err
 	}
 
-	if !hasEnoughBalance(betAmt, user) {
-		return fmt.Errorf("Insufficient balance")
-	}
+	// Calculate the total available balance (free play + current availability)
+	totalAvailable := user.CurrentFreePlay + user.CurrentAvailability
 
-	update := bson.M{"$set": bson.M{
-		"current_balance": user.CurrentBalance - betAmt,
-		"current_pending": user.CurrentPending + betAmt,
-	}}
-	_, err = userColl.UpdateOne(sessionContext, filter, update)
-	if err != nil {
-		return err
+	// Use free play first if available
+	if betAmt <= user.CurrentFreePlay {
+		// If the bet amount is less than or equal to free play, use free play only
+		update := bson.M{"$set": bson.M{
+			"current_free_play": user.CurrentFreePlay - betAmt,
+			"current_pending":   user.CurrentPending + betAmt,
+		}}
+		_, err = userColl.UpdateOne(sessionContext, filter, update)
+		if err != nil {
+			return err
+		}
+	} else if betAmt <= totalAvailable {
+		// If the bet amount is less than or equal to the total available balance, use free play and deduct the remaining from current availability
+		update := bson.M{"$set": bson.M{
+			"current_free_play":    0,
+			"current_availability": user.CurrentAvailability - (betAmt - user.CurrentFreePlay),
+			"current_pending":      user.CurrentPending + betAmt,
+		}}
+		_, err = userColl.UpdateOne(sessionContext, filter, update)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Insufficient funds
+		return fmt.Errorf("insufficient availability")
 	}
 
 	return s.AddBetToDB(bet, sessionContext)

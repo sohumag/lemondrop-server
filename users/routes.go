@@ -6,16 +6,11 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/account"
-	"github.com/stripe/stripe-go/v76/accountlink"
-	"github.com/stripe/stripe-go/v76/customer"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -64,24 +59,15 @@ func IsValidEmail(email string) bool {
 	return regex.MatchString(email)
 }
 
-// returns Account Link URL, error
-func (s *UserServer) HandleAccountLink(accountId string) (string, error) {
-	accountLinkParams := &stripe.AccountLinkParams{
-		Account:    stripe.String(accountId),
-		RefreshURL: stripe.String("https://lemondrop.ag/bets"),
-		ReturnURL:  stripe.String("https://lemondrop.ag/bets"),
-		Type:       stripe.String("account_onboarding"),
-		Collect:    stripe.String("eventually_due"),
-	}
+// on every monday at 12am, availability resets
+// if user goes down on week, need to pay by end of day monday or are banned until they pay
+// if user pays before week starts, they get all money to balance and availability.
 
-	accountLinkResult, err := accountlink.New(accountLinkParams)
-	if err != nil {
-		fmt.Println(err)
-		return "", err
-	}
-
-	return accountLinkResult.URL, nil
-}
+// bet goes from availabilty to pending. bet amount subtracted from availability
+// if won, won amount goes to balance and availability
+// if lost, bet amount subtracted from balance.
+// if pushed, bet amount goes to availability
+// finally, bet amount removed from pending
 
 func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 	referralCode, err := GenerateReferralCode()
@@ -104,45 +90,10 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 	if !IsValidEmail(data["email"]) {
 		return fmt.Errorf("invalid email")
 	}
-	email := data["email"]
 
-	// Set up Stripe API key
-	stripe.Key = os.Getenv("STRIPE_SECRET_TEST_KEY")
+	defaultMaxAvailability := 150.0
+	defaultInitialFreePlay := 10.0
 
-	accountParams := &stripe.AccountParams{
-		Country: stripe.String("US"),
-		Type:    stripe.String(string(stripe.AccountTypeExpress)),
-		Capabilities: &stripe.AccountCapabilitiesParams{
-			CardPayments: &stripe.AccountCapabilitiesCardPaymentsParams{
-				Requested: stripe.Bool(true),
-			},
-			Transfers: &stripe.AccountCapabilitiesTransfersParams{Requested: stripe.Bool(true)},
-		},
-		BusinessType: stripe.String(string(stripe.AccountBusinessTypeIndividual)),
-		Email:        &email,
-		// BusinessProfile: &stripe.AccountBusinessProfileParams{
-		// 	URL: stripe.String("https://example.com"),
-		// },
-		BusinessProfile: &stripe.AccountBusinessProfileParams{MCC: stripe.String("7995")},
-	}
-	result, err := account.New(accountParams)
-	if err != nil {
-		fmt.Println(err)
-	}
-	accountId := result.ID
-	fmt.Println(accountId)
-
-	redirectUrl, err := s.HandleAccountLink(accountId)
-
-	// Create a customer on Stripe
-	params := &stripe.CustomerParams{
-		Email: stripe.String(data["email"]),
-		Name:  stripe.String(data["first_name"] + data["last_name"]),
-		Phone: stripe.String(data["phone_number"]),
-	}
-	cust, _ := customer.New(params)
-
-	// Create a User struct
 	user := User{
 		FirstName:   data["first_name"],
 		LastName:    data["last_name"],
@@ -153,14 +104,11 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 		DateJoined:  time.Now(),
 
 		CurrentBalance:      0,
-		CurrentAvailability: 0,
-		CurrentFreePlay:     0,
+		CurrentAvailability: defaultMaxAvailability,
+		MaxAvailability:     defaultMaxAvailability,
+		CurrentFreePlay:     defaultInitialFreePlay,
 		CurrentPending:      0,
 		TotalProfit:         0,
-
-		StripeCustomerId: cust.ID,
-		StripeExpressId:  accountId,
-		DetailsSubmitted: false,
 
 		ReferralCode:     referralCode,
 		ReferredFromCode: referredFromCode,
@@ -183,27 +131,15 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 
 	fmt.Printf("Added user with id: %v\n", res.InsertedID)
 
-	// Generate JWT token
 	jwt, err := GenerateJWT(user.Email)
 	if err != nil {
 		return err
 	}
 
 	c.JSON(fiber.Map{
-		"jwt":          jwt,
-		"redirect_url": redirectUrl,
+		"jwt": jwt,
 	})
 
-	// dataMap := map[interface{}]interface{}{
-	// 	"jwt":          jwt,
-	// 	"redirect_url": redirectUrl,
-	// 	// "stripe_account_id": accountId,
-	// 	// "details_submitted": false,
-	// }
-
-	// fmt.Println(dataMap)
-
-	// c.JSON(dataMap)
 	return nil
 }
 
