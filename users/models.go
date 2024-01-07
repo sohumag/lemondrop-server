@@ -44,7 +44,7 @@ type ClientUser struct {
 	EmailVerified bool   `json:"email_verified" bson:"email_verified"`
 	PhoneVerified bool   `json:"phone_verified" bson:"phone_verified"`
 
-	UserId              primitive.ObjectID `json:"user_id" bson:"_id" bson:"user_id"`
+	UserId              primitive.ObjectID `json:"user_id" bson:"_id"`
 	DateJoined          time.Time          `json:"date_joined" bson:"date_joined"`
 	CurrentBalance      float64            `json:"current_balance" bson:"current_balance"`
 	CurrentAvailability float64            `json:"current_availability" bson:"current_availability"`

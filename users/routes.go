@@ -92,7 +92,7 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 	}
 
 	defaultMaxAvailability := 150.0
-	defaultInitialFreePlay := 10.0
+	defaultInitialFreePlay := 0.0
 
 	user := User{
 		FirstName:   data["first_name"],
