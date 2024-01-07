@@ -6,6 +6,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// betType: spread, moneyline, total, prop
+// // propType: game, player, etc. empty for now
+// propName: name of category (player points, 2+ made threes, alternative spreads, 1st quarter total poitns ...)
+// playerName: name of player who bet is placed on (pascal siakam over,  Washington wizards -1.5)
 // Bet represents the structure of a bet in the sportsbook.
 type Bet struct {
 	ID         primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
@@ -21,21 +25,16 @@ type Bet struct {
 	// jwt??
 }
 
-// betType: spread, moneyline, total, prop
-// // propType: game, player, etc. empty for now
-// propName: name of category (player points, 2+ made threes, alternative spreads, 1st quarter total poitns ...)
-// playerName: name of player who bet is placed on (pascal siakam over,  Washington wizards -1.5)
-
 type BetSelection struct {
 	BetOn      string `bson:"bet_on" json:"bet_on"`
 	BetType    string `bson:"bet_type" json:"bet_type"`
-	PropType   string `bson:"prop_type,omitempty" json:"prop_type,omitempty"`
-	PropName   string `bson:"prop_name,omitempty" json:"prop_name,omitempty"`
-	PlayerName string `bson:"player_name,omitempty" json:"player_name,omitempty"`
-	BetPoint   string `bson:"bet_point,omitempty" json:"bet_point,omitempty"`
-	Odds       string `bson:"odds,omitempty" json:"odds,omitempty"`
+	PropType   string `bson:"prop_type" json:"prop_type"`
+	PropName   string `bson:"prop_name" json:"prop_name"`
+	PlayerName string `bson:"player_name" json:"player_name"`
+	BetPoint   string `bson:"bet_point" json:"bet_point"`
+	Odds       string `bson:"odds" json:"odds"`
 
-	GameId       string `bson:"game_id,omitempty" json:"game_id"`
+	GameId       string `bson:"game_id" json:"game_id"`
 	GameHash     string `bson:"game_hash" json:"game_hash"`
 	HomeTeamName string `bson:"home_team_name" json:"home_team_name"`
 	AwayTeamName string `bson:"away_team_name" json:"away_team_name"`
@@ -50,7 +49,7 @@ type BetSelection struct {
 }
 
 type Score struct {
-	ID             primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	ID             primitive.ObjectID `bson:"_id" json:"_id"`
 	Completed      bool               `bson:"completed" json:"completed"`
 	AwayTeamName   string             `bson:"away_team_name" json:"away_team_name"`
 	AwayFinalScore string             `bson:"away_final_score" json:"away_final_score"`

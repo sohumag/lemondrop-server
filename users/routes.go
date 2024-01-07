@@ -95,13 +95,14 @@ func (s *UserServer) HandleSignUpRoute(c *fiber.Ctx) error {
 	defaultInitialFreePlay := 0.0
 
 	user := User{
-		FirstName:   data["first_name"],
-		LastName:    data["last_name"],
-		PhoneNumber: data["phone_number"],
-		Email:       data["email"],
-		Password:    data["password"],
-		UserId:      primitive.NewObjectID(),
-		DateJoined:  time.Now(),
+		FirstName:    data["first_name"],
+		LastName:     data["last_name"],
+		PhoneNumber:  data["phone_number"],
+		Email:        data["email"],
+		Password:     data["password"],
+		VenmoAccount: data["venmo_account"],
+		UserId:       primitive.NewObjectID(),
+		DateJoined:   time.Now(),
 
 		CurrentBalance:      0,
 		CurrentAvailability: defaultMaxAvailability,
