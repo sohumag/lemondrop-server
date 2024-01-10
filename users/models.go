@@ -56,3 +56,14 @@ type ClientUser struct {
 type UserServer struct {
 	client *mongo.Client
 }
+
+type WeeklyBalanceMetric struct {
+	Id          primitive.ObjectID `json:"id" bson:"_id"`
+	UserId      primitive.ObjectID `json:"user_id" bson:"user_id"`
+	Email       string             `json:"email" bson:"email"`
+	Name        string             `json:"name" bson:"name"`
+	PhoneNumber string             `json:"phone_number" bson:"phone_number"`
+	Balance     float64            `json:"balance" bson:"balance"`
+	CurrentDate time.Time          `json:"current_date" bson:"current_date"`
+	Paid        bool               `json:"paid" bson:"paid"`
+}

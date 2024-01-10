@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -89,15 +88,6 @@ func (s *UserServer) StartUserPaymentMetricsRepeater() error {
 	select {}
 }
 
-type WeeklyBalanceMetric struct {
-	UserId      primitive.ObjectID `json:"user_id" bson:"user_id"`
-	Email       string             `json:"email" bson:"email"`
-	Name        string             `json:"name" bson:"name"`
-	PhoneNumber string             `json:"phone_number" bson:"phone_number"`
-	Balance     float64            `json:"balance" bson:"balance"`
-	CurrentDate time.Time          `json:"current_date" bson:"current_date"`
-}
-
 func (s *UserServer) RunPaymentMetricWeeklyReset() error {
 	// get all users from db
 	// for each user,if balance != 0, add user id, email, name, phone number, balance, date to weekly end stats database
@@ -136,6 +126,7 @@ func (s *UserServer) RunPaymentMetricWeeklyReset() error {
 			PhoneNumber: user.PhoneNumber,
 			Balance:     user.CurrentBalance,
 			CurrentDate: time.Now(),
+			Paid:        false,
 		}
 
 		insertResult, err := balancesColl.InsertOne(context.Background(), balance)

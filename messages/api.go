@@ -73,6 +73,7 @@ func (s *MessageServer) HandleContactMessageRequest(c *fiber.Ctx) error {
 }
 
 type ContactMessage struct {
+	Id      string `json:"id" bson:"_id"`
 	Name    string `json:"name" bson:"name"`
 	Email   string `json:"email" bson:"email"`
 	Message string `json:"message" bson:"message"`

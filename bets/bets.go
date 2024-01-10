@@ -15,8 +15,6 @@ import (
 )
 
 // HandleBetRequest handles the incoming bet request.
-// HandleBetRequest handles the incoming bet request.
-
 func (s *BetServer) HandleBetRequest(c *fiber.Ctx) error {
 	bets := make([]Bet, 0)
 	if err := c.BodyParser(&bets); err != nil {
@@ -26,8 +24,8 @@ func (s *BetServer) HandleBetRequest(c *fiber.Ctx) error {
 
 	for _, bet := range bets {
 		bet.Status = "Pending"
-		bet.PlacedAt = time.Now()
 
+		bet.PlacedAt = time.Now()
 		// get game by hash and get time start. check if already passed. will work for parlays partially
 		coll := s.client.Database("games-db").Collection("scraped-games")
 		filter := bson.D{{Key: "hash", Value: bet.Selections[0].GameHash}}
