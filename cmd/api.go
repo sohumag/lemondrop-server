@@ -40,10 +40,10 @@ func StartAPI(port int) error {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
-	app.Use(keyauth.New(keyauth.Config{
-		KeyLookup: "header:lemondrop_api_key",
-		Validator: validateApiKey,
-	}))
+	// app.Use(keyauth.New(keyauth.Config{
+	// 	KeyLookup: "header:lemondrop_api_key",
+	// 	Validator: validateApiKey,
+	// }))
 
 	// API Group Router
 	api := app.Group("/api")
