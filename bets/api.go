@@ -2,6 +2,7 @@ package bets
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -41,6 +42,7 @@ func (s *BetServer) StartBetServerAPI(api fiber.Router) error {
 	})
 
 	betsApi.Post("/bet", func(c *fiber.Ctx) error {
+		fmt.Println("handling new bet..")
 		return s.HandleBetRequest(c)
 	})
 
