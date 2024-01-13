@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/rlvgl/bookie-server/games"
 	"github.com/rlvgl/bookie-server/users"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -27,15 +26,15 @@ func (s *BetServer) HandleBetRequest(c *fiber.Ctx) error {
 
 		bet.PlacedAt = time.Now()
 		// get game by hash and get time start. check if already passed. will work for parlays partially
-		coll := s.client.Database("games-db").Collection("scraped-games")
-		filter := bson.D{{Key: "hash", Value: bet.Selections[0].GameHash}}
+		// coll := s.client.Database("games-db").Collection("scraped-games")
+		// filter := bson.D{{Key: "hash", Value: bet.Selections[0].GameHash}}
 
-		game := games.Game{}
-		coll.FindOne(context.Background(), filter).Decode(&game)
+		// game := games.Game{}
+		// coll.FindOne(context.Background(), filter).Decode(&game)
 
-		if time.Now().After(game.StartDate) {
-			return fmt.Errorf("") // leave empty bc most likely hack attempt
-		}
+		// if time.Now().After(game.StartDate) {
+		// 	return fmt.Errorf("") // leave empty bc most likely hack attempt
+		// }
 
 		if bet.IsParlay {
 			bet.ParlayFinished = false
