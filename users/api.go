@@ -61,10 +61,10 @@ func (s *UserServer) StartUserServerAPI(api fiber.Router) error {
 }
 
 func (s *UserServer) Start(api fiber.Router) error {
-	err := s.RunPaymentMetricWeeklyReset()
-	if err != nil {
-		fmt.Println(err)
-	}
+	// err := s.RunPaymentMetricWeeklyReset()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 	s.StartUserServerAPI(api)
 	return nil
 }

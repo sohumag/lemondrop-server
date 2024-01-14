@@ -6,9 +6,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rlvgl/bookie-server/bets"
 	"github.com/rlvgl/bookie-server/messages"
 	"github.com/rlvgl/bookie-server/users"
 	"go.mongodb.org/mongo-driver/bson"
@@ -58,7 +60,190 @@ func (s *AdminServer) StartAdminServerAPI(api fiber.Router) error {
 		return s.GetAllUsers(c)
 	})
 
+	mapi.Get("/bets/all", func(c *fiber.Ctx) error {
+		return s.GetAllBets(c)
+	})
+
+	mapi.Post("/bets/status/:betId", func(c *fiber.Ctx) error {
+		return s.ChangeBetsStatus(c)
+	})
+
 	return nil
+}
+
+func calculateOdds(bet bets.Bet) float64 {
+	currentOdds := 1.0
+
+	for _, selection := range bet.Selections {
+		priceFloat := 0
+		priceString := fmt.Sprint(selection.Odds)
+
+		if priceString[0] == '+' {
+			priceFloat = parseInt(priceString[1:])
+		} else {
+			priceFloat = parseInt(priceString[1:]) * -1
+		}
+
+		decimalOdds := 1.0
+		if priceFloat > 0 {
+			decimalOdds = 1 + float64(priceFloat)/100
+		} else {
+			decimalOdds = 1 - 100/float64(priceFloat)
+		}
+
+		currentOdds *= decimalOdds
+	}
+
+	return currentOdds
+}
+
+func parseInt(s string) int {
+	var result int
+	fmt.Sscanf(s, "%d", &result)
+	return result
+}
+
+func parseFloat(s string) (float64, error) {
+	result, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return 0.0, err
+	}
+	return result, nil
+}
+
+func (s *AdminServer) ChangeBetsStatus(c *fiber.Ctx) error {
+	// get bet id => get bet
+	// update bet status
+	// update user status
+
+	ValidateUserAdmin(c)
+
+	betId := c.Params("betId")
+
+	// Convert id string to ObjectId
+	objectID, err := primitive.ObjectIDFromHex(betId)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ObjectID"})
+	}
+	collection := s.client.Database("bets-db").Collection("bets")
+	filter := bson.D{{"_id", objectID}}
+
+	var bet bets.Bet
+	err = collection.FindOne(context.Background(), filter).Decode(&bet)
+	if err != nil {
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "Document not found"})
+	}
+
+	floatAmt, err := parseFloat(bet.Amount)
+	if err != nil {
+		return err
+	}
+	toWinAmount := floatAmt * calculateOdds(bet)
+	betAmt, err := parseFloat(bet.Amount)
+
+	session, err := s.client.StartSession()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to start session")
+	}
+	defer session.EndSession(context.Background())
+
+	_, err = session.WithTransaction(context.Background(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+		user := users.User{}
+		userID, err := primitive.ObjectIDFromHex(bet.UserID)
+		err = s.client.Database("users-db").Collection("users").FindOne(sessionContext, bson.M{"_id": userID}).Decode(&user)
+		if err != nil {
+			return nil, err
+		}
+
+		betsCollection := s.client.Database("bets-db").Collection("bets")
+		userCollection := s.client.Database("users-db").Collection("users")
+
+		// Update user based on bet status
+		dataMap := make(map[string]interface{})
+		if err := c.BodyParser(&dataMap); err != nil {
+			return nil, c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+		}
+
+		// Access parsed data
+		status, ok := dataMap["status"].(string)
+		if !ok {
+			return nil, c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid 'status' field in request body"})
+		}
+
+		// Check if the status is the same as the current bet status
+		// You can replace this logic with your specific use case
+		if status == bet.Status {
+			return nil, c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "No new status update"})
+		}
+
+		switch dataMap["status"] {
+		case "Won":
+			fmt.Println("marking bet as won.")
+			user.CurrentBalance += toWinAmount
+			user.CurrentPending -= betAmt
+		case "Lost":
+			fmt.Println("marking bet as lost.")
+			user.CurrentPending -= betAmt
+			user.CurrentBalance -= betAmt
+		case "Pushed":
+			fmt.Println("marking bet as pushed.")
+			user.CurrentPending -= betAmt
+			user.CurrentAvailability += betAmt
+		default:
+			return nil, fmt.Errorf("Invalid bet status")
+		}
+
+		bet.Status = dataMap["status"].(string)
+		// if err != nil {
+		// 	return err
+		// }
+		// Update user in the database
+		_, err = userCollection.UpdateOne(sessionContext, bson.M{"_id": userID}, bson.M{"$set": user})
+		if err != nil {
+			return nil, err
+		}
+
+		// Update bet status
+		_, err = betsCollection.UpdateOne(sessionContext, bson.M{"_id": bet.ID}, bson.M{"$set": bson.M{"bet_status": bet.Status}})
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	})
+
+	if err != nil {
+		log.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Transaction failed"})
+	}
+
+	return nil
+}
+
+func (s *AdminServer) GetAllBets(c *fiber.Ctx) error {
+	ValidateUserAdmin(c)
+
+	coll := s.client.Database("bets-db").Collection("bets")
+	docs := []bets.Bet{}
+
+	opts := options.Find().SetSort(bson.D{{"placed_at", -1}})
+	cursor, err := coll.Find(context.Background(), bson.D{{}}, opts)
+	if err != nil {
+		return err
+	}
+
+	for cursor.Next(context.Background()) {
+		var doc bets.Bet
+		if err := cursor.Decode(&doc); err != nil {
+			fmt.Println("Error decoding document:", err)
+			continue
+		}
+		docs = append(docs, doc)
+	}
+	c.JSON(docs)
+
+	return nil
+
 }
 
 func (s *AdminServer) GetAllUsers(c *fiber.Ctx) error {
