@@ -68,7 +68,6 @@ func (s *BetServer) HandleBetRequest(c *fiber.Ctx) error {
 
 	return c.SendString("Bets placed successfully")
 }
-
 func (s *BetServer) HandleBet(bet *Bet, sessionContext mongo.SessionContext) error {
 	userColl := s.client.Database("users-db").Collection("users")
 	user := users.User{}
@@ -88,8 +87,8 @@ func (s *BetServer) HandleBet(bet *Bet, sessionContext mongo.SessionContext) err
 		return err
 	}
 
-	// Calculate the total available balance (free play + current availability)
-	totalAvailable := user.CurrentFreePlay + user.CurrentAvailability
+	// Calculate the total available balance (free play + current availability + current balance)
+	totalAvailable := user.CurrentFreePlay + user.CurrentAvailability + user.CurrentBalance
 
 	// Use free play first if available
 	if betAmt <= user.CurrentFreePlay {
@@ -102,11 +101,23 @@ func (s *BetServer) HandleBet(bet *Bet, sessionContext mongo.SessionContext) err
 		if err != nil {
 			return err
 		}
-	} else if betAmt <= totalAvailable {
-		// If the bet amount is less than or equal to the total available balance, use free play and deduct the remaining from current availability
+	} else if betAmt <= (user.CurrentFreePlay + user.CurrentAvailability) {
+		// If the bet amount is less than or equal to the total of free play and current availability, use free play and availability
 		update := bson.M{"$set": bson.M{
 			"current_free_play":    0,
 			"current_availability": user.CurrentAvailability - (betAmt - user.CurrentFreePlay),
+			"current_pending":      user.CurrentPending + betAmt,
+		}}
+		_, err = userColl.UpdateOne(sessionContext, filter, update)
+		if err != nil {
+			return err
+		}
+	} else if betAmt <= totalAvailable {
+		// If the bet amount is less than or equal to the total available balance, use free play, availability, and deduct the remaining from current balance
+		update := bson.M{"$set": bson.M{
+			"current_free_play":    0,
+			"current_availability": 0,
+			"current_balance":      user.CurrentBalance - (betAmt - user.CurrentFreePlay - user.CurrentAvailability),
 			"current_pending":      user.CurrentPending + betAmt,
 		}}
 		_, err = userColl.UpdateOne(sessionContext, filter, update)
