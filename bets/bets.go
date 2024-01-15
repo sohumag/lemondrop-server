@@ -87,9 +87,6 @@ func (s *BetServer) HandleBet(bet *Bet, sessionContext mongo.SessionContext) err
 		return err
 	}
 
-	// Calculate the total available balance (free play + current availability + current balance)
-	totalAvailable := user.CurrentFreePlay + user.CurrentAvailability + user.CurrentBalance
-
 	// Use free play first if available
 	if betAmt <= user.CurrentFreePlay {
 		// If the bet amount is less than or equal to free play, use free play only
@@ -106,18 +103,6 @@ func (s *BetServer) HandleBet(bet *Bet, sessionContext mongo.SessionContext) err
 		update := bson.M{"$set": bson.M{
 			"current_free_play":    0,
 			"current_availability": user.CurrentAvailability - (betAmt - user.CurrentFreePlay),
-			"current_pending":      user.CurrentPending + betAmt,
-		}}
-		_, err = userColl.UpdateOne(sessionContext, filter, update)
-		if err != nil {
-			return err
-		}
-	} else if betAmt <= totalAvailable {
-		// If the bet amount is less than or equal to the total available balance, use free play, availability, and deduct the remaining from current balance
-		update := bson.M{"$set": bson.M{
-			"current_free_play":    0,
-			"current_availability": 0,
-			"current_balance":      user.CurrentBalance - (betAmt - user.CurrentFreePlay - user.CurrentAvailability),
 			"current_pending":      user.CurrentPending + betAmt,
 		}}
 		_, err = userColl.UpdateOne(sessionContext, filter, update)

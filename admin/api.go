@@ -179,6 +179,7 @@ func (s *AdminServer) ChangeBetsStatus(c *fiber.Ctx) error {
 		switch dataMap["status"] {
 		case "Won":
 			fmt.Println("marking bet as won.")
+			user.CurrentAvailability += toWinAmount
 			user.CurrentBalance += toWinAmount
 			user.CurrentPending -= betAmt
 		case "Lost":
