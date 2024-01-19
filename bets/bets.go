@@ -98,12 +98,12 @@ func (s *BetServer) HandleBet(bet *Bet, sessionContext mongo.SessionContext) err
 		if err != nil {
 			return err
 		}
-	} else if betAmt <= (user.CurrentFreePlay + user.CurrentAvailability) {
-		// If the bet amount is less than or equal to the total of free play and current availability, use free play and availability
+	} else if betAmt <= (user.CurrentFreePlay + user.CurrentBalance) {
+		// If the bet amount is less than or equal to the total of free play and current balance=, use free play and balance
 		update := bson.M{"$set": bson.M{
-			"current_free_play":    0,
-			"current_availability": user.CurrentAvailability - (betAmt - user.CurrentFreePlay),
-			"current_pending":      user.CurrentPending + betAmt,
+			"current_free_play": 0,
+			"current_balance":   user.CurrentBalance - (betAmt - user.CurrentFreePlay),
+			"current_pending":   user.CurrentPending + betAmt,
 		}}
 		_, err = userColl.UpdateOne(sessionContext, filter, update)
 		if err != nil {
@@ -111,7 +111,7 @@ func (s *BetServer) HandleBet(bet *Bet, sessionContext mongo.SessionContext) err
 		}
 	} else {
 		// Insufficient funds
-		return fmt.Errorf("insufficient availability")
+		return fmt.Errorf("insufficient balance")
 	}
 
 	return s.AddBetToDB(bet, sessionContext)

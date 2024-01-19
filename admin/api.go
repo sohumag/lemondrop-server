@@ -186,6 +186,7 @@ func (s *AdminServer) ChangeBetsStatus(c *fiber.Ctx) error {
 			fmt.Println("marking bet as lost.")
 			user.CurrentPending -= betAmt
 			user.CurrentBalance -= betAmt
+			// availability is removed on bet placed -> pending
 		case "Pushed":
 			fmt.Println("marking bet as pushed.")
 			user.CurrentPending -= betAmt
