@@ -15,6 +15,7 @@ func (s *GameServer) GetAllSports(c *fiber.Ctx) error {
 		{SportName: "Football"},
 		{SportName: "Ice Hockey"},
 		{SportName: "Soccer"},
+		{SportName: "Combat Sports"},
 	}
 
 	c.JSON(sports)
@@ -50,6 +51,7 @@ func (s *GameServer) GetAllSportsAndLeagues(c *fiber.Ctx) error {
 		{SportName: "Football", SportId: "football", PhotoUrl: "https://a3.espncdn.com/combiner/i?img=%2Fredesign%2Fassets%2Fimg%2Ficons%2FESPN%2Dicon%2Dfootball%2Dcollege.png&w=80&h=80&scale=crop&cquality=40&location=origin"},
 		{SportName: "Ice Hockey", SportId: "ice_hockey", PhotoUrl: "https://a4.espncdn.com/combiner/i?img=%2Fredesign%2Fassets%2Fimg%2Ficons%2FESPN%2Dicon%2Dhockey.png&w=80&h=80&scale=crop&cquality=40&location=origin"},
 		{SportName: "Soccer", SportId: "soccer", PhotoUrl: "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-soccer.png&w=64&h=64&scale=crop&cquality=40&location=origin"},
+		{SportName: "Combat Sports", SportId: "combat_sports", PhotoUrl: "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-mma.png&w=64&h=64&scale=crop&cquality=40&location=origin"},
 	}
 
 	// Loop through the original array
